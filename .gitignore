@@ -1,3 +1,8 @@
+.git/
+.idea/
+venv/
 .env
-.venv/
+*.exe
+*.log
+*.edn
 __pycache__/
