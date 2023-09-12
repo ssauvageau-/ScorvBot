@@ -66,7 +66,8 @@ global_embed.add_field(
           "\n**6**. Moderators and Admins private message you for a reason, listen."
           "\n**7**. Do not advertise or encourage anything that is against the TOS/EULA of Grim Dawn."
           "\n**8**. Do not advertise any kind of Discord/community/campaign or other links without permission."
-          "\n**9**. Check the links down below before asking for support.",
+          "\n**9**. Check the links down below before asking for support."
+          "\n**10**. Political discussions and topics shall be kept short or entirely avoided if possible in all channels.",
     inline=False
 )
 channel_news_embed = discord.Embed(color=0x1E1F22)
