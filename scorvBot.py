@@ -158,6 +158,19 @@ async def post_rules(ctx, arg):
             await channel.send(embed=embeds.channel_offtopic_embed)
             await channel.send("https://cdn.discordapp.com/attachments/647753999948185611/647754159034204160/2a8e119d-e266-40d3-a9c8-a92194b658472Fchat_roles.png")
             await channel.send(embed=embeds.chat_roles_embed)
+        else:
+            await ctx.message.channel.send("Channel ID " + arg + " does not exist!")
+    else:
+        await ctx.message.channel.send("Nice try, kiddo!")
+
+@commands.has_permissions(manage_messages=True)
+@bot.command(aliases=['post-links'])
+async def post_links(ctx, arg):
+    if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
+        id = int(arg)
+        channel = bot.get_channel(id)
+        if channel:
+            await channel.purge()
             await channel.send("https://cdn.discordapp.com/attachments/647753999948185611/647754188469567488/2a8e119d-e266-40d3-a9c8-a92194b658472Fbuy_now.png")
             await channel.send(embed=embeds.buy_gd_embed)
             await channel.send(embed=embeds.buy_aom_embed)
@@ -169,7 +182,6 @@ async def post_rules(ctx, arg):
             await ctx.message.channel.send("Channel ID " + arg + " does not exist!")
     else:
         await ctx.message.channel.send("Nice try, kiddo!")
-
 
 @bot.event
 async def on_message(message):
