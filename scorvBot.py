@@ -142,7 +142,8 @@ async def clear_commands(ctx, number: int = 1):
 @bot.command(aliases=['post-rules'])
 async def post_rules(ctx, arg):
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
-        channel = bot.get_channel(arg)
+        id = int(arg)
+        channel = bot.get_channel(id)
         if channel:
             await channel.purge()
             await channel.send("https://cdn.discordapp.com/attachments/428832869398347776/1151199255990640721/Grim_Dawn_Discord_Logo.png")
