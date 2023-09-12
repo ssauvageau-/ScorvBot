@@ -185,8 +185,8 @@ buy_foa_embed.add_field(
           "\nComing Posthaste!",
     inline=True
 )
-buy_foa_embed.set_image(url="https://cdn.discordapp.com/attachments/428832869398347776/1151193829869891739/gdx3_GD_icon_1.png")
-buy_foa_embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/428832869398347776/1151193901013667880/cropped-gdx3_headerboxtop.png")
+buy_foa_embed.set_image(url="https://cdn.discordapp.com/attachments/428832869398347776/1151193901013667880/cropped-gdx3_headerboxtop.png")
+buy_foa_embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/428832869398347776/1151193829869891739/gdx3_GD_icon_1.png")
 links_embed = discord.Embed(color=0x1E1F22)
 links_embed.add_field(
     name="",
