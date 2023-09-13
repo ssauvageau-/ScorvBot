@@ -2,6 +2,7 @@
 # DO NOT REMOVE COMMENTED OR UNUSED IMPORTS
 import ast
 import os
+import io
 from os.path import exists
 import sys
 import discord
@@ -121,7 +122,8 @@ async def clear(ctx, number: int = 1):
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
         with suppress(AttributeError):
             channel: discord.TextChannel = ctx.channel
-            if number > 100: number = 100
+            # TODO - Write waiting call for n > 5; this command otherwise makes too many requests above 5 deletions!
+            if number > 5: number = 5
             async for m in channel.history(limit=number):
                 await m.delete()
 
@@ -133,10 +135,27 @@ async def clear_commands(ctx, number: int = 1):
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
         with suppress(AttributeError):
             channel: discord.TextChannel = ctx.channel
-            if number > 100: number = 100
+            # TODO - Write waiting call for n > 5; this command otherwise makes too many requests above 5 deletions!
+            if number > 5: number = 5
             async for m in channel.history(limit=number):
                 if m.content[0] == "!":
                     await m.delete()
+
+
+@bot.command(aliases=['rabagur', 'praise'])
+async def praise_rabagur(ctx):
+    with open("images/rabagur.png", "rb") as fh:
+        f = discord.File(fh, filename="images/rabagur.png")
+    await ctx.channel.send(file=f)
+    await ctx.message.delete()
+
+
+@bot.command(aliases=['nicememe', 'nice-meme', 'nm'])
+async def nice_meme(ctx):
+    with open("images/scorvmeme.png", "rb") as fh:
+        f = discord.File(fh, filename="images/scorvmeme.png")
+    await ctx.channel.send(file=f)
+    await ctx.message.delete()
 
 
 @commands.has_permissions(manage_messages=True)
