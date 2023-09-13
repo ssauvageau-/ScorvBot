@@ -5,6 +5,7 @@ from discord.flags import Intents
 from dotenv import load_dotenv
 
 from commands.app_commands import MiscCommandGroup
+from cogs.moderation import ModerationCommandCog
 
 load_dotenv()
 TEST_GUILD_ID = os.getenv("DISCORD_GUILD")
@@ -20,9 +21,11 @@ class ScorvClient(discord.Client):
 
     async def setup_hook(self):
         self.tree.add_command(MiscCommandGroup())
+#        self.tree.add_command(ModerationCommandCog()) # expects a 'bot'
         self.tree.copy_global_to(guild=TEST_GUILD)
         await self.tree.sync(guild=TEST_GUILD)
 
 
 client = ScorvClient(intents=discord.Intents.default())
+#client.load_extension("cogs.moderation")
 client.run(TOKEN)

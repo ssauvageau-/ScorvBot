@@ -12,7 +12,6 @@ from discord.utils import get
 import json
 # noinspection PyUnresolvedReferences
 from dotenv import load_dotenv
-from contextlib import suppress
 import embeds
 
 load_dotenv()
@@ -66,106 +65,6 @@ async def on_command_error(ctx, error):
 @commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def _help(ctx):
     await ctx.send(embed=embeds.help_embed)
-
-
-@bot.command(aliases=['create-channel', 'cc'])
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
-async def create_channel(ctx, arg):
-    if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
-        guild = ctx.guild
-        existing_channel = discord.utils.get(guild.channels, name=arg)
-        if not existing_channel:
-            await guild.create_text_channel(arg)
-        await ctx.message.delete()
-
-
-@bot.command(aliases=['create-hidden-channel', 'chc', 'create-hidden'])
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
-async def create_hidden_channel(ctx, arg, *args):
-    if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
-        guild = ctx.guild
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            guild.me: discord.PermissionOverwrite(read_messages=True)
-        }
-        for id in [*args]:
-            overwrites.update({guild.get_member(int(id)): discord.PermissionOverwrite(read_messages=True)})
-        existing_channel = discord.utils.get(guild.channels, name=arg)
-        if not existing_channel:
-            await guild.create_text_channel(arg, overwrites=overwrites)
-        await ctx.message.delete()
-
-
-@bot.command(aliases=['create-hidden-channel-no-bot', 'chcnb'])
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
-async def create_hidden_channel_no_bot(ctx, arg, *args):
-    if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
-        guild = ctx.guild
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            guild.me: discord.PermissionOverwrite(read_messages=False)
-        }
-        for id in [*args]:
-            overwrites.update({guild.get_member(int(id)): discord.PermissionOverwrite(read_messages=True)})
-        existing_channel = discord.utils.get(guild.channels, name=arg)
-        if not existing_channel:
-            await guild.create_text_channel(arg, overwrites=overwrites)
-        await ctx.message.delete()
-
-
-@bot.command(aliases=['create-role', 'new-role', 'cr'])
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
-async def create_role(ctx, arg):
-    if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
-        guild = ctx.guild
-        existing_role = discord.utils.get(guild.roles, name=arg)
-        if not existing_role:
-            await guild.create_role(name=arg)
-            await ctx.message.delete()
-        else:
-            await ctx.message.channel.send("Role **" + arg + "** already exists!")
-
-
-@bot.command(aliases=['delete-role', 'dr'])
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
-async def delete_role(ctx, arg):
-    if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
-        guild = ctx.guild
-        role = discord.utils.get(guild.roles, name=arg)
-        if role:
-            await role.delete()
-            await ctx.message.delete()
-        else:
-            await ctx.message.channel.send("Role **" + arg + "** does not exist.")
-
-
-@commands.has_permissions(manage_messages=True)
-@bot.command(name='clear')
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
-async def clear(ctx, number: int = 1):
-    await ctx.message.delete()
-    if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
-        with suppress(AttributeError):
-            channel: discord.TextChannel = ctx.channel
-            # TODO - Write waiting call for n > 5; this command otherwise makes too many requests above 5 deletions!
-            if number > 5: number = 5
-            async for m in channel.history(limit=number):
-                await m.delete()
-
-
-@commands.has_permissions(manage_messages=True)
-@bot.command(aliases=['clear-commands', 'clear-c'])
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
-async def clear_commands(ctx, number: int = 1):
-    await ctx.message.delete()
-    if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
-        with suppress(AttributeError):
-            channel: discord.TextChannel = ctx.channel
-            # TODO - Write waiting call for n > 5; this command otherwise makes too many requests above 5 deletions!
-            if number > 5: number = 5
-            async for m in channel.history(limit=number):
-                if m.content[0] == "!":
-                    await m.delete()
 
 
 @bot.command(aliases=['rabagur', 'praise'])

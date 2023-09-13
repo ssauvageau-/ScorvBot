@@ -1,47 +1,47 @@
 import discord
 
-helpEmbed = discord.Embed(title="Command List", color=0xFF5733)
-helpEmbed.add_field(
+help_embed = discord.Embed(title="Command List", color=0xFF5733)
+help_embed.add_field(
     name="commandList, commands", value="* Displays this help dialogue.", inline=False
 )
-helpEmbed.add_field(
+help_embed.add_field(
     name="clear", value="Arguments: N (default=1)\n* Clears the previous N messages.", inline=False
 )
-helpEmbed.add_field(
+help_embed.add_field(
     name="clear-commands, clear-c", value="Arguments: N (default=1)\n* Clears the previous N messages which begin "
                                           "with the command prefix.", inline=False
 )
-helpEmbed.add_field(
+help_embed.add_field(
     name="create-channel, cc", value="Arguments: Name (required)\n* Creates a text channel called Name.", inline=False
 )
-helpEmbed.add_field(
+help_embed.add_field(
     name="create-hidden-channel, chc", value="Arguments: Name (required), IDs (optional, supports multiple)\n"
                                              "* Creates a hidden text channel called Name that only those with the "
                                              "given IDs can view, along with the bot and the server owner.",
     inline=False
 )
-helpEmbed.add_field(
+help_embed.add_field(
     name="create-hidden-channel-no-bot, chcnb", value="Arguments: Name (required), IDs (optional, supports multiple)\n"
                                                       "* Creates a hidden text channel called Name that only those with"
                                                       " the given IDs can view, along with the server owner.",
     inline=False
 )
-helpEmbed.add_field(
+help_embed.add_field(
     name="create-role, new-role, cr", value="Arguments: Name (required)\n"
                                             "* Creates the Name role if it does not exist, or informs the user if it "
                                             "does.",
     inline=False
 )
-helpEmbed.add_field(
+help_embed.add_field(
     name="delete-role, dr", value="Arguments: Name (required)\n"
                                   "* Deletes the role named Name, or informs the user that no such role exists.",
     inline=False
 )
-helpEmbed.add_field(
+help_embed.add_field(
     name="help", value="* Generates the default discord.py help message with no documentation.",
     inline=False
 )
-helpEmbed.add_field(
+help_embed.add_field(
     name="quit, q", value="* Shuts down the bot."
                           "\n\nOnly the bot author can use this command.",
     inline=False
