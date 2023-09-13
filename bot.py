@@ -35,4 +35,21 @@ bot_activity = discord.Activity(
     type=discord.ActivityType.watching, name="for fresh meat!"
 )
 bot = ScorvBot(intents=discord.Intents.all(), activity=bot_activity)
+
+# Global Message Handling
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return
+    elif message.content == "nerd":
+        await message.channel.send("nerd")
+        await message.delete()
+    # elif "https://twitter.com" in message.content:
+    #    await message.channel.send(message.content.replace("https://twitter.com", "https://vxtwitter.com"))
+    #    await message.delete()
+    elif "crab" in message.content:
+        await message.add_reaction('🦀')
+
+    await bot.process_commands(message)
+
 bot.run(TOKEN)

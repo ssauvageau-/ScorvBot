@@ -29,46 +29,12 @@ async def in_guild(ctx):
     return ctx.guild is not None
 
 
-def command_cooldown_generic(ctx):
-    roles = {role.name for role in ctx.author.roles}
-    if not COMMAND_WHITELIST.isdisjoint(roles):
-        # whitelisted roles have no cooldown for this command structure
-        return None
-    elif "Janitor" in roles:
-        # example exclusionary rule for Janitors
-        return discord.app_commands.Cooldown(1, 15)
-    else:
-        return discord.app_commands.Cooldown(1, 30)
-
-# Mostly used for testing purposes, not presently attached to any function call.
-def command_cooldown_nolist(ctx):
-    return discord.app_commands.Cooldown(1, 10)
-
-
-@bot.event
-async def on_ready():
-    print("ScorvBot is now online.")
-
-
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, (CommandNotFound, CheckFailure)): return
-    if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(f"Command on cooldown for {round(error.retry_after, 1)} seconds!")
-    if error == KeyboardInterrupt:
-        await bot.close()
-        return
-    raise error
-
-
 @bot.command(aliases=['commandList', 'commands'])
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def _help(ctx):
     await ctx.send(embed=embeds.help_embed)
 
 
 @bot.command(aliases=['rabagur', 'praise'])
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def praise_rabagur(ctx):
     with open("images/rabagur.png", "rb") as fh:
         f = discord.File(fh, filename="images/rabagur.png")
@@ -77,7 +43,6 @@ async def praise_rabagur(ctx):
 
 
 @bot.command(aliases=['nicememe', 'nice-meme', 'nm'])
-@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def nice_meme(ctx):
     with open("images/scorvmeme.png", "rb") as fh:
         f = discord.File(fh, filename="images/scorvmeme.png")
@@ -129,21 +94,6 @@ async def post_links(ctx, arg):
             await ctx.message.channel.send("Channel ID " + arg + " does not exist!")
     else:
         await ctx.message.channel.send("Nice try, kiddo!")
-
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-    elif message.content == "nerd":
-        await message.channel.send("nerd")
-        await message.delete()
-    # elif "https://twitter.com" in message.content:
-    #    await message.channel.send(message.content.replace("https://twitter.com", "https://vxtwitter.com"))
-    #    await message.delete()
-    elif "crab" in message.content:
-        await message.add_reaction('🦀')
-
-    await bot.process_commands(message)
 
 
 @bot.command(aliases=['quit', 'q'])

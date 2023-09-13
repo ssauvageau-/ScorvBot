@@ -2,11 +2,8 @@ from contextlib import suppress
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import CommandNotFound, CheckFailure
-from discord import app_commands
 
 COMMAND_WHITELIST = {"Admin", "Moderator"}
-
 
 class ModerationCommandCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -17,18 +14,6 @@ class ModerationCommandCog(commands.Cog):
             await ctx.channel.send(f"Command on cooldown for **{round(error.retry_after, 1)}** seconds.")
         else:
             raise error
-
-    # Unused?
-    # def command_cooldown_generic(self, ctx):
-    #     roles = {role.name for role in ctx.author.roles}
-    #     if not COMMAND_WHITELIST.isdisjoint(roles):
-    #         # whitelisted roles have no cooldown for this command structure
-    #         return None
-    #     elif "Janitor" in roles:
-    #         # example exclusionary rule for Janitors
-    #         return discord.app_commands.Cooldown(1, 15)
-    #     else:
-    #         return discord.app_commands.Cooldown(1, 30)
 
     @commands.command(aliases=['create-channel', 'cc'])
     @commands.cooldown(rate=1, per=10, type=commands.BucketType.user)
