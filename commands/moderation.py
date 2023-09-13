@@ -1,4 +1,5 @@
 from contextlib import suppress
+
 import discord
 from discord.ext import commands
 
@@ -6,7 +7,7 @@ COMMAND_WHITELIST = {"Admin", "Moderator"}
 
 
 class ModerationCommandCog(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     def command_cooldown_generic(self, ctx):
