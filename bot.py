@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from commands.misc import MiscCommandGroup
 from commands.moderation import ModerationCommandCog
+from commands.assign_role import AssignRoleCommandGroup
 
 load_dotenv()
 TEST_GUILD_ID = os.getenv("DISCORD_GUILD")
@@ -24,6 +25,7 @@ class ScorvBot(commands.Bot):
 
         # Add application command groups here
         self.tree.add_command(MiscCommandGroup(self))
+        self.tree.add_command(AssignRoleCommandGroup(self))
 
         self.tree.copy_global_to(guild=TEST_GUILD)
         await self.tree.sync(guild=TEST_GUILD)
