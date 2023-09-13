@@ -2,6 +2,8 @@ from contextlib import suppress
 
 import discord
 from discord.ext import commands
+from discord.ext.commands import CommandNotFound, CheckFailure
+from discord import app_commands
 
 COMMAND_WHITELIST = {"Admin", "Moderator"}
 
@@ -10,19 +12,26 @@ class ModerationCommandCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    def command_cooldown_generic(self, ctx):
-        roles = {role.name for role in ctx.author.roles}
-        if not COMMAND_WHITELIST.isdisjoint(roles):
-            # whitelisted roles have no cooldown for this command structure
-            return None
-        elif "Janitor" in roles:
-            # example exclusionary rule for Janitors
-            return discord.app_commands.Cooldown(1, 15)
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.channel.send(f"Command on cooldown for **{round(error.retry_after, 1)}** seconds.")
         else:
-            return discord.app_commands.Cooldown(1, 30)
+            raise error
+
+    # Unused?
+    # def command_cooldown_generic(self, ctx):
+    #     roles = {role.name for role in ctx.author.roles}
+    #     if not COMMAND_WHITELIST.isdisjoint(roles):
+    #         # whitelisted roles have no cooldown for this command structure
+    #         return None
+    #     elif "Janitor" in roles:
+    #         # example exclusionary rule for Janitors
+    #         return discord.app_commands.Cooldown(1, 15)
+    #     else:
+    #         return discord.app_commands.Cooldown(1, 30)
 
     @commands.command(aliases=['create-channel', 'cc'])
-    @commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=10, type=commands.BucketType.user)
     async def create_channel(self, ctx, arg):
         roles = {role.name for role in ctx.author.roles}
         if not COMMAND_WHITELIST.isdisjoint(roles):
@@ -33,7 +42,7 @@ class ModerationCommandCog(commands.Cog):
             await ctx.message.delete()
 
     @commands.command(aliases=['create-hidden-channel', 'chc', 'create-hidden'])
-    @commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=10, type=commands.BucketType.user)
     async def create_hidden_channel(self, ctx, arg, *args):
         roles = {role.name for role in ctx.author.roles}
         if not COMMAND_WHITELIST.isdisjoint(roles):
@@ -50,7 +59,7 @@ class ModerationCommandCog(commands.Cog):
             await ctx.message.delete()
 
     @commands.command(aliases=['create-hidden-channel-no-bot', 'chcnb'])
-    @commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=10, type=commands.BucketType.user)
     async def create_hidden_channel_no_bot(self, ctx, arg, *args):
         roles = {role.name for role in ctx.author.roles}
         if not COMMAND_WHITELIST.isdisjoint(roles):
@@ -67,7 +76,7 @@ class ModerationCommandCog(commands.Cog):
             await ctx.message.delete()
 
     @commands.command(aliases=['create-role', 'new-role', 'cr'])
-    @commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=5, type=commands.BucketType.user)
     async def create_role(self, ctx, arg):
         roles = {role.name for role in ctx.author.roles}
         if not COMMAND_WHITELIST.isdisjoint(roles):
@@ -80,7 +89,7 @@ class ModerationCommandCog(commands.Cog):
                 await ctx.message.channel.send("Role **" + arg + "** already exists!")
 
     @commands.command(aliases=['delete-role', 'dr'])
-    @commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=5, type=commands.BucketType.user)
     async def delete_role(self, ctx, arg):
         roles = {role.name for role in ctx.author.roles}
         if not COMMAND_WHITELIST.isdisjoint(roles):
@@ -94,7 +103,7 @@ class ModerationCommandCog(commands.Cog):
 
     @commands.has_permissions(manage_messages=True)
     @commands.command(name='clear')
-    @commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=3, type=commands.BucketType.user)
     async def clear(self, ctx, number: int = 1):
         await ctx.message.delete()
         roles = {role.name for role in ctx.author.roles}
@@ -108,7 +117,7 @@ class ModerationCommandCog(commands.Cog):
 
     @commands.has_permissions(manage_messages=True)
     @commands.command(aliases=['clear-commands', 'clear-c'])
-    @commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=3, type=commands.BucketType.user)
     async def clear_commands(self, ctx, number: int = 1):
         await ctx.message.delete()
         roles = {role.name for role in ctx.author.roles}
