@@ -22,11 +22,28 @@ SUB_OWNER = int(os.getenv('DISCORD_SUBOWNER'))
 intents = discord.Intents.all()
 intents.members = True
 PREFIX = '!'
+COMMAND_WHITELIST = {"Admin", "Moderator"}
 
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 async def in_guild(ctx):
     return ctx.guild is not None
+
+
+def command_cooldown_generic(ctx):
+    roles = {role.name for role in ctx.author.roles}
+    if not COMMAND_WHITELIST.isdisjoint(roles):
+        # whitelisted roles have no cooldown for this command structure
+        return None
+    elif "Janitor" in roles:
+        # example exclusionary rule for Janitors
+        return discord.app_commands.Cooldown(1, 15)
+    else:
+        return discord.app_commands.Cooldown(1, 30)
+
+# Mostly used for testing purposes, not presently attached to any function call.
+def command_cooldown_nolist(ctx):
+    return discord.app_commands.Cooldown(1, 10)
 
 
 @bot.event
@@ -38,6 +55,8 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, (CommandNotFound, CheckFailure)): return
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(f"Command on cooldown for {round(error.retry_after, 1)} seconds!")
     if error == KeyboardInterrupt:
         await bot.close()
         return
@@ -45,11 +64,13 @@ async def on_command_error(ctx, error):
 
 
 @bot.command(aliases=['commandList', 'commands'])
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def _help(ctx):
     await ctx.send(embed=embeds.help_embed)
 
 
 @bot.command(aliases=['create-channel', 'cc'])
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def create_channel(ctx, arg):
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
         guild = ctx.guild
@@ -60,6 +81,7 @@ async def create_channel(ctx, arg):
 
 
 @bot.command(aliases=['create-hidden-channel', 'chc', 'create-hidden'])
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def create_hidden_channel(ctx, arg, *args):
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
         guild = ctx.guild
@@ -76,6 +98,7 @@ async def create_hidden_channel(ctx, arg, *args):
 
 
 @bot.command(aliases=['create-hidden-channel-no-bot', 'chcnb'])
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def create_hidden_channel_no_bot(ctx, arg, *args):
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
         guild = ctx.guild
@@ -92,6 +115,7 @@ async def create_hidden_channel_no_bot(ctx, arg, *args):
 
 
 @bot.command(aliases=['create-role', 'new-role', 'cr'])
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def create_role(ctx, arg):
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
         guild = ctx.guild
@@ -104,6 +128,7 @@ async def create_role(ctx, arg):
 
 
 @bot.command(aliases=['delete-role', 'dr'])
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def delete_role(ctx, arg):
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
         guild = ctx.guild
@@ -117,6 +142,7 @@ async def delete_role(ctx, arg):
 
 @commands.has_permissions(manage_messages=True)
 @bot.command(name='clear')
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def clear(ctx, number: int = 1):
     await ctx.message.delete()
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
@@ -130,6 +156,7 @@ async def clear(ctx, number: int = 1):
 
 @commands.has_permissions(manage_messages=True)
 @bot.command(aliases=['clear-commands', 'clear-c'])
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def clear_commands(ctx, number: int = 1):
     await ctx.message.delete()
     if ctx.author.id == OWNER_ID or ctx.author.id == SUB_OWNER:
@@ -143,6 +170,7 @@ async def clear_commands(ctx, number: int = 1):
 
 
 @bot.command(aliases=['rabagur', 'praise'])
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def praise_rabagur(ctx):
     with open("images/rabagur.png", "rb") as fh:
         f = discord.File(fh, filename="images/rabagur.png")
@@ -151,6 +179,7 @@ async def praise_rabagur(ctx):
 
 
 @bot.command(aliases=['nicememe', 'nice-meme', 'nm'])
+@commands.dynamic_cooldown(command_cooldown_generic, type=commands.BucketType.user)
 async def nice_meme(ctx):
     with open("images/scorvmeme.png", "rb") as fh:
         f = discord.File(fh, filename="images/scorvmeme.png")
