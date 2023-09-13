@@ -14,7 +14,8 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 
 class ScorvClient(discord.Client):
     def __init__(self, intents: Intents) -> None:
-        super().__init__(intents=intents)
+        activity = discord.Activity(type=discord.ActivityType.watching, name="for fresh meat!")
+        super().__init__(command_prefix="!", intents=intents, activity=activity)
         self.tree = discord.app_commands.CommandTree(self)
 
     async def setup_hook(self):

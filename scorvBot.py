@@ -49,7 +49,6 @@ def command_cooldown_nolist(ctx):
 @bot.event
 async def on_ready():
     print("ScorvBot is now online.")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for fresh meat!"))
 
 
 @bot.event
