@@ -1,7 +1,7 @@
 import os
 
 import discord
-import discord.ui.button
+from discord.ui import Button
 from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -31,7 +31,10 @@ class TagSystemGroup(app_commands.Group, name="tag"):
             await interaction.response.send_message("Tag " + tag_clean + " already exists!")
             return
         else:  # redundant but indented for clarity
-            await self.bot.get_channel(int(self.approval_channel)).send(embed=create_embed(interaction, tag_clean, content_clean))
+            await self.bot.get_channel(int(self.approval_channel)).send(
+                embed=create_embed(interaction, tag_clean, content_clean),
+                view=create_approval_buttons()
+            )
             await interaction.response.send_message("Tag " + tag_clean + " has been submitted for review.")
             return
 
@@ -39,6 +42,27 @@ class TagSystemGroup(app_commands.Group, name="tag"):
 def load_tags(fn):
     with open(fn) as disk_lib:
         return json.load(disk_lib)
+
+
+def create_approval_buttons():
+    buttons = discord.ui.View()
+    buttons.add_item(item=Button(
+        style=discord.ButtonStyle.green,
+        label="Approve",
+        custom_id='approve_button',
+        disabled=False,
+        emoji='👍',
+        row=1
+    ))
+    buttons.add_item(item=Button(
+        style=discord.ButtonStyle.red,
+        label="Deny",
+        custom_id='deny_button',
+        disabled=False,
+        emoji='👎',
+        row=1
+    ))
+    return buttons
 
 
 def create_embed(interaction: discord.Interaction, tag, data):
