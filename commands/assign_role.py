@@ -26,9 +26,13 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
         mastery_role_id = int(os.getenv(mastery.value))
 
         # Check if the user already has the role that they're asking for
-        if user.get_role(mastery_role_id) is not None:
+        mastery_role = user.get_role(mastery_role_id)
+        if mastery_role is not None:
+            await user.remove_roles(
+                mastery_role, reason="Unassigning existing master role"
+            )
             await interaction.response.send_message(
-                f"You already have the {mastery.name} role!", ephemeral=True
+                f"Unassigned the {mastery.name} role!", ephemeral=True
             )
             return
 
@@ -37,7 +41,7 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
             role_id = int(os.getenv(item.value))
             role = user.get_role(role_id)
             if role is not None:
-                await user.remove_roles(role)
+                await user.remove_roles(role, reason="Removing existing master role(s)")
 
         # Assign new mastery role to user
         mastery_role = interaction.guild.get_role(mastery_role_id)
