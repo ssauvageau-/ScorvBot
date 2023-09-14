@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from commands.misc import MiscCommandGroup
 from commands.moderation import ModerationCommandCog
 from commands.assign_role import AssignRoleCommandGroup
+from commands.tags import TagSystemGroup
 
 load_dotenv()
 TEST_GUILD_ID = os.getenv("DISCORD_GUILD")
@@ -20,12 +21,13 @@ class ScorvBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents, activity=activity)
 
     async def setup_hook(self):
-        # Add comand cogs here
+        # Add command cogs here
         await self.add_cog(ModerationCommandCog(self))
 
         # Add application command groups here
         self.tree.add_command(MiscCommandGroup(self))
         self.tree.add_command(AssignRoleCommandGroup(self))
+        self.tree.add_command(TagSystemGroup(self))
 
         self.tree.copy_global_to(guild=TEST_GUILD)
         await self.tree.sync(guild=TEST_GUILD)
