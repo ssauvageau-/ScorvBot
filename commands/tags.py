@@ -1,13 +1,12 @@
+import base64
 import os
+import json
 
 import discord
 from discord.ui import Button
 from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
-import json
-
-tagDict = {}
 
 
 @app_commands.guild_only()
@@ -33,7 +32,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         else:  # redundant but indented for clarity
             await self.bot.get_channel(int(self.approval_channel)).send(
                 embed=create_embed(interaction, tag_clean, content_clean),
-                view=await create_approval_buttons(interaction, tag_clean)
+                view=await create_approval_buttons(self, interaction, tag_clean, content_clean)
             )
             await interaction.response.send_message("Tag " + tag_clean + " has been submitted for review.")
             return
@@ -41,10 +40,14 @@ class TagSystemGroup(app_commands.Group, name="tag"):
 
 def load_tags(fn):
     with open(fn) as disk_lib:
-        return json.load(disk_lib)
+        return json.loads(disk_lib.read())
+
+def dump_tags(fn, tags):
+    with open(fn, 'w') as disk_lib:
+        disk_lib.write(json.dumps(tags, sort_keys=True))
 
 
-async def create_approval_buttons(submission: discord.Interaction, tag):
+async def create_approval_buttons(self, submission: discord.Interaction, tag, data):
     buttons = discord.ui.View(timeout=None)
     approval_button = Button(
         style=discord.ButtonStyle.green,
@@ -56,8 +59,12 @@ async def create_approval_buttons(submission: discord.Interaction, tag):
     )
 
     async def approval_callback(interaction: discord.Interaction):
-        # We don't use this Interaction but Discord *will* send it into our override so we need to catch it
-        await submission.user.send("Your tag: \"!" + tag + "\" has been approved on the Grim Dawn server!")
+        # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
+        #await submission.user.send(f"Your tag: \"!{tag}\" has been approved on the Grim Dawn server!")
+        await interaction.message.channel.send(f"Tag {tag} approved by {interaction.user}.")
+        self.tagDict[tag] = data
+        dump_tags(os.getenv("TAG_JSON_PATH"), self.tagDict)
+        await interaction.message.delete()
     approval_button.callback = approval_callback
 
     deny_button = Button(
@@ -70,8 +77,10 @@ async def create_approval_buttons(submission: discord.Interaction, tag):
     )
 
     async def deny_callback(interaction: discord.Interaction):
-        # We don't use this Interaction but Discord *will* send it into our override so we need to catch it
-        await submission.user.send("Your tag: \"!" + tag + "\" has been denied on the Grim Dawn server.")
+        # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
+        await submission.user.send(f"Your tag: \"!{tag}\" has been denied on the Grim Dawn server.")
+        await interaction.message.channel.send(f"Tag {tag} denied by {interaction.user}.")
+        await interaction.message.delete()
     deny_button.callback = deny_callback
 
     buttons.add_item(item=approval_button)
