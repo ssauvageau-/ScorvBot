@@ -33,7 +33,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         else:  # redundant but indented for clarity
             await self.bot.get_channel(int(self.approval_channel)).send(
                 embed=create_embed(interaction, tag_clean, content_clean),
-                view=create_approval_buttons()
+                view=await create_approval_buttons(interaction, tag_clean)
             )
             await interaction.response.send_message("Tag " + tag_clean + " has been submitted for review.")
             return
@@ -44,24 +44,38 @@ def load_tags(fn):
         return json.load(disk_lib)
 
 
-def create_approval_buttons():
-    buttons = discord.ui.View()
-    buttons.add_item(item=Button(
+async def create_approval_buttons(submission: discord.Interaction, tag):
+    buttons = discord.ui.View(timeout=None)
+    approval_button = Button(
         style=discord.ButtonStyle.green,
         label="Approve",
         custom_id='approve_button',
         disabled=False,
         emoji='👍',
         row=1
-    ))
-    buttons.add_item(item=Button(
+    )
+
+    async def approval_callback(interaction: discord.Interaction):
+        # We don't use this Interaction but Discord *will* send it into our override so we need to catch it
+        await submission.user.send("Your tag: \"!" + tag + "\" has been approved on the Grim Dawn server!")
+    approval_button.callback = approval_callback
+
+    deny_button = Button(
         style=discord.ButtonStyle.red,
         label="Deny",
         custom_id='deny_button',
         disabled=False,
         emoji='👎',
         row=1
-    ))
+    )
+
+    async def deny_callback(interaction: discord.Interaction):
+        # We don't use this Interaction but Discord *will* send it into our override so we need to catch it
+        await submission.user.send("Your tag: \"!" + tag + "\" has been denied on the Grim Dawn server.")
+    deny_button.callback = deny_callback
+
+    buttons.add_item(item=approval_button)
+    buttons.add_item(item=deny_button)
     return buttons
 
 
@@ -69,7 +83,7 @@ def create_embed(interaction: discord.Interaction, tag, data):
     tag_embed = discord.Embed(
         title="New Tag Submission",
         type="rich",
-        description=tag,
+        description="Key: " + tag,
         color=0x00FFFF
     )
     tag_embed.set_author(
@@ -78,7 +92,7 @@ def create_embed(interaction: discord.Interaction, tag, data):
     )
     tag_embed.add_field(
         name="Content",
-        value=data,
+        value="Value: " + data,
         inline=False
     )
     tag_embed.add_field(
