@@ -1,4 +1,5 @@
 import base64
+import copy
 import os
 import json
 
@@ -8,12 +9,16 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
+REMOVE_WHITELIST = {"Admin", "Moderator", "Janitor"}
 
 @app_commands.guild_only()
 class TagSystemGroup(app_commands.Group, name="tag"):
     def __init__(self, bot: commands.Bot):
         load_dotenv()
-        self.tagDict = load_tags(os.getenv("TAG_JSON_PATH"))
+        try:
+            self.tagDict = load_tags(os.getenv("TAG_JSON_PATH"))
+        except json.decoder.JSONDecodeError:
+            self.tagDict = {}
         self.approval_channel = os.getenv("TAG_APPROVAL_ID")
         self.bot = bot
         super().__init__()
@@ -27,24 +32,45 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         tag_clean = tag.strip()
         content_clean = content.strip()
         if tag_clean in self.tagDict:
-            await interaction.response.send_message("Tag " + tag_clean + " already exists!")
+            await interaction.response.send_message("Tag " + tag_clean + " already exists!", ephemeral=True)
             return
         else:  # redundant but indented for clarity
             await self.bot.get_channel(int(self.approval_channel)).send(
                 embed=create_embed(interaction, tag_clean, content_clean),
                 view=await create_approval_buttons(self, interaction, tag_clean, content_clean)
             )
-            await interaction.response.send_message("Tag " + tag_clean + " has been submitted for review.")
+            await interaction.response.send_message("Tag " + tag_clean + " has been submitted for review.", ephemeral=True)
             return
+
+    @app_commands.command(
+        name="remove", description="Remove a tag"
+    )
+    async def remove_tag(
+            self, interaction: discord.Interaction, tag: str
+    ):
+        # TODO - Extract deletion to confirmation dialog buttons?
+        if REMOVE_WHITELIST.isdisjoint({role.name for role in interaction.user.roles}):
+            await interaction.response.send_message("Insufficient privileges for tag removal, sorry!", ephemeral=True)
+            return
+        tag_clean = tag.strip()
+        if tag_clean in self.tagDict:
+            # Deep clone in place so as not to interfere with other async funcs that may be reading dict at time
+            clone = copy.deepcopy(self.tagDict)
+            del clone[tag_clean]
+            self.tagDict = clone
+            dump_tags(os.getenv("TAG_JSON_PATH"), self.tagDict)
+            await interaction.response.send_message("Tag successfully removed.", ephemeral=True)
+
+
 
 
 def load_tags(fn):
     with open(fn) as disk_lib:
         return json.loads(disk_lib.read())
 
-def dump_tags(fn, tags):
+def dump_tags(fn, dict):
     with open(fn, 'w') as disk_lib:
-        disk_lib.write(json.dumps(tags, sort_keys=True))
+        disk_lib.write(json.dumps(dict, sort_keys=True))
 
 
 async def create_approval_buttons(self, submission: discord.Interaction, tag, data):
@@ -62,7 +88,12 @@ async def create_approval_buttons(self, submission: discord.Interaction, tag, da
         # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
         #await submission.user.send(f"Your tag: \"!{tag}\" has been approved on the Grim Dawn server!")
         await interaction.message.channel.send(f"Tag {tag} approved by {interaction.user}.")
-        self.tagDict[tag] = data
+        self.tagDict[tag] = {
+            "name": tag,
+            "data": data,
+            "author": interaction.user.name,
+            "creation": interaction.created_at.strftime('%a %d %b %Y, %I:%M%p %Z')
+        }
         dump_tags(os.getenv("TAG_JSON_PATH"), self.tagDict)
         await interaction.message.delete()
     approval_button.callback = approval_callback
