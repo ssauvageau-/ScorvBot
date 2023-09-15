@@ -64,10 +64,12 @@ async def post_rules(ctx, arg):
             await channel.send("https://cdn.discordapp.com/attachments/647753999948185611/647754112661848094/2a8e119d-e266-40d3-a9c8-a92194b658472Fatt.png")
             await channel.send(embed=embeds.global_embed)
             await channel.send("https://cdn.discordapp.com/attachments/647753999948185611/647754128541614090/2a8e119d-e266-40d3-a9c8-a92194b658472Fchannel_rules.png")
-            await channel.send(embed=embeds.channel_news_embed)
-            await channel.send(embed=embeds.channel_gd_embed)
-            await channel.send(embed=embeds.channel_community_embed)
-            await channel.send(embed=embeds.channel_offtopic_embed)
+            await channel.send(embeds=[
+                embeds.channel_news_embed,
+                embeds.channel_gd_embed,
+                embeds.channel_community_embed,
+                embeds.channel_offtopic_embed
+            ])
             await channel.send("https://cdn.discordapp.com/attachments/647753999948185611/647754159034204160/2a8e119d-e266-40d3-a9c8-a92194b658472Fchat_roles.png")
             await channel.send(embed=embeds.chat_roles_embed)
         else:
@@ -84,10 +86,12 @@ async def post_links(ctx, arg):
         if channel:
             await channel.purge()
             await channel.send("https://cdn.discordapp.com/attachments/647753999948185611/647754188469567488/2a8e119d-e266-40d3-a9c8-a92194b658472Fbuy_now.png")
-            await channel.send(embed=embeds.buy_gd_embed)
-            await channel.send(embed=embeds.buy_aom_embed)
-            await channel.send(embed=embeds.buy_fg_embed)
-            await channel.send(embed=embeds.buy_foa_embed)
+            await channel.send(embeds=[
+                embeds.buy_gd_embed,
+                embeds.buy_aom_embed,
+                embeds.buy_fg_embed,
+                embeds.buy_foa_embed
+            ])
             await channel.send("https://cdn.discordapp.com/attachments/647753999948185611/647754218198925312/2a8e119d-e266-40d3-a9c8-a92194b658472Flinkbase.png")
             await channel.send(embed=embeds.links_embed)
         else:
