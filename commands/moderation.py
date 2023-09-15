@@ -16,16 +16,6 @@ class ModerationCommandCog(commands.Cog):
         else:
             raise error
 
-    @commands.command(aliases=['quit'])
-    async def shutdown(self, ctx):
-        roles = {role.name for role in ctx.author.roles}
-        if not QUIT_WHITELIST.isdisjoint(roles):
-            try:
-                await ctx.bot.close()
-            except RuntimeError: return # expected
-        else:
-            await ctx.message.channel.send("Nice try, kiddo!")
-
     @commands.command(aliases=['create-channel', 'cc'])
     @commands.cooldown(rate=1, per=10, type=commands.BucketType.user)
     async def create_channel(self, ctx, arg):
