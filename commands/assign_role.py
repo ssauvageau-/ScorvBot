@@ -5,7 +5,7 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from enums.mastery_roles import MasteryRoles
+from enums import MasteryRoles, PingRoles
 
 
 @app_commands.guild_only()
@@ -49,4 +49,34 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
 
         await interaction.response.send_message(
             f"Assigned the {mastery.name} role!", ephemeral=True
+        )
+
+    @app_commands.command(
+        name="pings", description="Choose which news pings you'd like to receive"
+    )
+    @app_commands.describe(ping_role="The announcement ping role you want")
+    @app_commands.rename(ping_role="role")
+    async def assign_ping_role(
+        self, interaction: discord.Interaction, ping_role: PingRoles
+    ):
+        user = interaction.user
+        ping_role_id = int(os.getenv(ping_role.value))
+
+        # Unassign the role if the user already has it
+        user_ping_role = user.get_role(ping_role_id)
+        if user_ping_role is not None:
+            await user.remove_roles(
+                user_ping_role, reason="Unassigning existing ping role"
+            )
+            await interaction.response.send_message(
+                f"Unassigned the {ping_role.name} role!", ephemeral=True
+            )
+            return
+
+        # Assign the new ping role to the user
+        guild_ping_role = interaction.guild.get_role(ping_role_id)
+        await user.add_roles(guild_ping_role, reason="Assigning new ping role")
+
+        await interaction.response.send_message(
+            f"Assigned the {ping_role.name} role!", ephemeral=True
         )
