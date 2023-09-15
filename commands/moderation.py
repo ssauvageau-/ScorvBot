@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 COMMAND_WHITELIST = {"Admin", "Moderator"}
+QUIT_WHITELIST = {"Admin"}
 
 class ModerationCommandCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -14,6 +15,16 @@ class ModerationCommandCog(commands.Cog):
             await ctx.channel.send(f"Command on cooldown for **{round(error.retry_after, 1)}** seconds.")
         else:
             raise error
+
+    @commands.command(aliases=['quit'])
+    async def shutdown(self, ctx):
+        roles = {role.name for role in ctx.author.roles}
+        if not QUIT_WHITELIST.isdisjoint(roles):
+            try:
+                await ctx.bot.close()
+            except RuntimeError: return # expected
+        else:
+            await ctx.message.channel.send("Nice try, kiddo!")
 
     @commands.command(aliases=['create-channel', 'cc'])
     @commands.cooldown(rate=1, per=10, type=commands.BucketType.user)

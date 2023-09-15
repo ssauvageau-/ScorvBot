@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from commands.misc import MiscCommandGroup
 from commands.moderation import ModerationCommandCog
+from commands.announcements import AnnouncementCommandCog
 from commands.assign_role import AssignRoleCommandGroup
 from commands.tags import TagSystemGroup
 
@@ -23,6 +24,7 @@ class ScorvBot(commands.Bot):
     async def setup_hook(self):
         # Add command cogs here
         await self.add_cog(ModerationCommandCog(self))
+        await self.add_cog(AnnouncementCommandCog(self))
 
         # Add application command groups here
         self.tree.add_command(MiscCommandGroup(self))
