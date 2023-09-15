@@ -40,6 +40,7 @@ bot_activity = discord.Activity(
 )
 bot = ScorvBot(intents=discord.Intents.all(), activity=bot_activity)
 
+
 # Global Message Handling
 @bot.event
 async def on_message(message):
@@ -52,8 +53,9 @@ async def on_message(message):
     #    await message.channel.send(message.content.replace("https://twitter.com", "https://vxtwitter.com"))
     #    await message.delete()
     elif "crab" in message.content:
-        await message.add_reaction('🦀')
+        await message.add_reaction("🦀")
 
     await bot.process_commands(message)
+
 
 bot.run(TOKEN)
