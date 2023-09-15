@@ -2,7 +2,7 @@ import base64
 import copy
 import os
 import json
-from typing import Dict
+from typing import Dict, List
 
 import discord
 from discord.ui import Button
@@ -33,6 +33,20 @@ class TagSystemGroup(app_commands.Group, name="tag"):
     def dump_tags(self) -> None:
         with open(self.tag_json_path, 'w', encoding="utf-8") as disk_lib:
             disk_lib.write(json.dumps(self.tag_dict, sort_keys=True))
+
+    @app_commands.command(name="post", description="Post a tag in chat.")
+    async def post_tag(self, interaction: discord.Interaction, choice: str):
+        await interaction.response.send_message(
+            str(self.tag_dict[choice]["data"])
+        )
+
+    @post_tag.autocomplete('choice')
+    async def tag_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        choices = [*self.tag_dict]
+        return [
+            app_commands.Choice(name=choice, value=choice)
+            for choice in choices if current.lower() in choice.lower()
+        ]
 
     @app_commands.command(name="submit", description="Submit a new tag for review.")
     async def submit_tag(
