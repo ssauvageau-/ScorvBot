@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import random
 
 
 class Events(commands.Cog):
@@ -20,5 +21,21 @@ class Events(commands.Cog):
         if message.author == self.bot.user:
             return
 
-        if "crab" in message.content:
-            await message.add_reaction("🦀")
+        if "crab" in message.content.lower():
+            await message.add_reaction(
+                random.choice(
+                    [
+                        "🦀",
+                        "<:crabDevotion:796803035904606250>",
+                        "<a:crabPls:649476167266467842>",
+                    ]
+                )
+            )
+
+    @commands.Cog.listener(name="on_message")
+    async def thinkematic_event(self, message: discord.Message):
+        if message.author == self.bot.user:
+            return
+        if message.content.replace(" ", "") == "🤔😉":
+            await message.channel.send("<:winking:359819933711859713>")
+            await message.delete()
