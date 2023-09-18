@@ -10,6 +10,7 @@ from commands.moderation import ModerationCommandCog
 from commands.announcements import AnnouncementCommandCog
 from commands.assign_role import AssignRoleCommandGroup
 from commands.tags import TagSystemGroup
+from events import Events
 
 load_dotenv()
 TEST_GUILD_ID = os.getenv("TEST_GUILD")
@@ -25,6 +26,7 @@ class ScorvBot(commands.Bot):
 
     async def setup_hook(self):
         # Add command cogs here
+        await self.add_cog(Events(self))
         await self.add_cog(ModerationCommandCog(self))
         await self.add_cog(AnnouncementCommandCog(self))
 
@@ -43,23 +45,4 @@ bot_activity = discord.Activity(
     type=discord.ActivityType.watching, name="for fresh meat!"
 )
 bot = ScorvBot(intents=discord.Intents.all(), activity=bot_activity)
-
-
-# Global Message Handling
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-    elif message.content == "nerd":
-        await message.channel.send("nerd")
-        await message.delete()
-    # elif "https://twitter.com" in message.content:
-    #    await message.channel.send(message.content.replace("https://twitter.com", "https://vxtwitter.com"))
-    #    await message.delete()
-    elif "crab" in message.content:
-        await message.add_reaction("🦀")
-
-    await bot.process_commands(message)
-
-
 bot.run(TOKEN)
