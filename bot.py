@@ -35,8 +35,8 @@ class ScorvBot(commands.Bot):
 
         self.tree.copy_global_to(guild=TEST_GUILD)
         await self.tree.sync(guild=TEST_GUILD)
-        self.tree.copy_global_to(guild=PRIMARY_GUILD)
-        await self.tree.sync(guild=PRIMARY_GUILD)
+        # self.tree.copy_global_to(guild=PRIMARY_GUILD)
+        # await self.tree.sync(guild=PRIMARY_GUILD)
 
 
 bot_activity = discord.Activity(

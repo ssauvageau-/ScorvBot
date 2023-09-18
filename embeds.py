@@ -69,16 +69,27 @@ welcome_embed.add_field(
 global_embed = discord.Embed(color=0x1E1F22)
 global_embed.add_field(
     name="Global Rules",
-    value="**1**. Follow the channel rules."
-    "\n**2**. Be respectful to everyone."
-    "\n**3**. Restrict yourself to english."
-    "\n**4**. Posting pornographic, disturbing, illegal images/links is strictly prohibited."
-    "\n**5**. There is no need to be upset about anything."
-    "\n**6**. Moderators and Admins private message you for a reason, listen."
-    "\n**7**. Do not advertise or encourage anything that is against the TOS/EULA of Grim Dawn."
+    value="**1**. Follow the rules outlined below for the various channels."
+    "\n**2**. Keep discussions civil and respect the ideas of others even if you disagree with them. Hate speech and "
+          "any kind of discrimination will not be tolerated. "
+    "\n**3**. Please keep all discussions on the server in English, as this is the language spoken by all moderation staff. "
+    "\n**4**. Posting pornographic, disturbing, illegal images/links is strictly prohibited. Examples of such "
+          "prohibited content include, but are not limited to: real or disturbing depictions of violence; content "
+          "that exploits children in any way and sexually explicit content. "
+    "\n**5**. Engagement in/promotion of unlawful activity is strictly prohibited. Examples of such prohibited "
+          "activity include, but are not limited to: exploiting minors; stealing; encouraging real-world violence; "
+          "engaging in fraud; piracy; hacking; breaking copyright laws. Discussion of piracy is prohibited, "
+          "and no support will be given for issues arising from use of a pirated game copy. "
+    "\n**6**. Let the moderators handle all moderation duties. If you find an issue, please use the "
+          "<@&137735685674106880> tag to ping them and let them handle the issue. Entangling yourself in the issue "
+          "will only cause more disruption. Disagreements in DM's should be handled by users themselves (\"block\" if "
+          "necessary). Exceptions to this are: 1) scam attempts, and 2) users trying to circumvent moderation on the "
+          "server by taking harassment to DM's instead. In such cases, please DM a moderator with screenshots of the "
+          "conversation. All reported issues will be handled on a case-by-case basis. "
+    "\n**7**. Do not advertise or encourage anything that is against the TOS/EULA of Grim Dawn. Respect the Terms of "
+          "Service & Guidelines of Discord - https://discord.com/terms | https://discord.com/guidelines "
     "\n**8**. Do not advertise any kind of Discord/community/campaign or other links without permission."
-    "\n**9**. Check the links down below before asking for support."
-    "\n**10**. Political discussions and topics shall be kept short or entirely avoided if possible in all channels.",
+    "\n**9**. Political discussions and topics shall be kept short or entirely avoided if possible in all channels.",
     inline=False,
 )
 channel_news_embed = discord.Embed(color=0x1E1F22)
@@ -161,7 +172,9 @@ buy_gd_embed.add_field(
     "\n**Steam**"
     "\nhttps://store.steampowered.com/app/219990/Grim_Dawn/"
     "\n**Humble Bundle**"
-    "\nhttps://www.humblebundle.com/store/grim-dawn",
+    "\nhttps://www.humblebundle.com/store/grim-dawn"
+    "\n**GOG**"
+    "\nhttps://www.gog.com/en/game/grim_dawn",
     inline=True,
 )
 buy_gd_embed.set_image(
@@ -176,7 +189,9 @@ buy_aom_embed.add_field(
     value="**Steam**"
     "\nhttps://store.steampowered.com/app/642280/Grim_Dawn__Ashes_of_Malmouth_Expansion/"
     "\n**Humble Bundle**"
-    "\nhttps://www.humblebundle.com/store/grim-dawn-ashes-of-malmouth-expansion",
+    "\nhttps://www.humblebundle.com/store/grim-dawn-ashes-of-malmouth-expansion"
+    "\n**GOG**"
+    "\nhttps://www.gog.com/en/game/grim_dawn_ashes_of_malmouth",
     inline=True,
 )
 buy_aom_embed.set_image(
@@ -191,7 +206,9 @@ buy_fg_embed.add_field(
     value="**Steam**"
     "\nhttps://store.steampowered.com/app/897670/Grim_Dawn__Forgotten_Gods_Expansion/"
     "\n**Humble Bundle**"
-    "\nhttps://www.humblebundle.com/store/grim-dawn-forgotten-gods-expansion",
+    "\nhttps://www.humblebundle.com/store/grim-dawn-forgotten-gods-expansion"
+    "\n**GOG**"
+    "\nhttps://www.gog.com/en/game/grim_dawn_forgotten_gods",
     inline=True,
 )
 buy_fg_embed.set_image(
@@ -203,7 +220,12 @@ buy_fg_embed.set_thumbnail(
 buy_foa_embed = discord.Embed(color=0x60FFFC)
 buy_foa_embed.add_field(
     name="",
-    value="**Steam**" "\nComing Posthaste!" "\n**Humble Bundle**" "\nComing Posthaste!",
+    value="**Steam**"
+    "\nArriving Posthaste!" 
+    "\n**Humble Bundle**" 
+    "\nArriving Posthaste!"
+    "\n**GOG**"
+    "\nArriving Posthaste!",
     inline=True,
 )
 buy_foa_embed.set_image(
