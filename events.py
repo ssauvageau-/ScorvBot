@@ -37,12 +37,12 @@ class Events(commands.Cog):
     async def thinkematic_event(self, message: discord.Message):
         if message.author == self.bot.user:
             return
-        
+
         thinkematics_tm = {
             "🤔😉": "<:winking:359819933711859713>",
             "🤔🇯🇵": "<:weebthink:359798823725432842>",
-            "🤔🖕": "<:upthink:359820561305829386>",     
-            "🤔☯": "<:thinkyang:359822049650147339>", 
+            "🤔🖕": "<:upthink:359820561305829386>",
+            "🤔☯": "<:thinkyang:359822049650147339>",
             "🤔🌊": "<:thinkwave:359800247876059139>",
             "🤔✝️": "<:thinkusVult:537783872595689487>",
             "🤔👍": "<:thinkup:359823000159387649>",
@@ -60,7 +60,7 @@ class Events(commands.Cog):
             "🤔🥔": "<:spudthink:347098778647658515>",
             "🤔🦀": "<:ok_thinking:359798825763995648>",
             "🤔🎩": "<:mthinking:359821640340733952>",
-            "🤔👈": "<:leftythink:359821079264624640>",  
+            "🤔👈": "<:leftythink:359821079264624640>",
             "🤔👏": "<:clapking:359798826388815889>",
             "🤔🍞": "<:breading:359821383401865228>",
             "🤔🍺": "<:beerthink:359821722439909376>",
@@ -68,7 +68,7 @@ class Events(commands.Cog):
             "🤔🍿": "<:thinkcorn:376774691144204288>",
             "🤔🅱️": "<:bhinking:537783061656371220>",
             "🤔💩": "<:poopthink:538566107687288862>",
-            "<:thonking:327364004211064832><:thonking:327364004211064832>": "<a:thonkered:540696116069400607>"
+            "<:thonking:327364004211064832><:thonking:327364004211064832>": "<a:thonkered:540696116069400607>",
         }
 
         pruned = message.content.replace(" ", "")
