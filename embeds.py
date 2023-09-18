@@ -79,8 +79,13 @@ global_embed.add_field(
     "\n**5**. Engagement in/promotion of unlawful activity is strictly prohibited. Examples of such prohibited "
           "activity include, but are not limited to: exploiting minors; stealing; encouraging real-world violence; "
           "engaging in fraud; piracy; hacking; breaking copyright laws. Discussion of piracy is prohibited, "
-          "and no support will be given for issues arising from use of a pirated game copy. "
-    "\n**6**. Let the moderators handle all moderation duties. If you find an issue, please use the "
+          "and no support will be given for issues arising from use of a pirated game copy. ",
+    inline=False,
+)
+global_embed2 = discord.Embed(color=0x1E1F22)
+global_embed2.add_field(
+    name="",
+    value="\n**6**. Let the moderators handle all moderation duties. If you find an issue, please use the "
           "<@&137735685674106880> tag to ping them and let them handle the issue. Entangling yourself in the issue "
           "will only cause more disruption. Disagreements in DM's should be handled by users themselves (\"block\" if "
           "necessary). Exceptions to this are: 1) scam attempts, and 2) users trying to circumvent moderation on the "
@@ -89,8 +94,7 @@ global_embed.add_field(
     "\n**7**. Do not advertise or encourage anything that is against the TOS/EULA of Grim Dawn. Respect the Terms of "
           "Service & Guidelines of Discord - https://discord.com/terms | https://discord.com/guidelines "
     "\n**8**. Do not advertise any kind of Discord/community/campaign or other links without permission."
-    "\n**9**. Political discussions and topics shall be kept short or entirely avoided if possible in all channels.",
-    inline=False,
+    "\n**9**. Political discussions and topics shall be kept short or entirely avoided if possible in all channels."
 )
 channel_news_embed = discord.Embed(color=0x1E1F22)
 channel_news_embed.add_field(

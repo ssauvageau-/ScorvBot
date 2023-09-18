@@ -37,6 +37,7 @@ class AnnouncementCommandCog(commands.Cog):
                     "https://cdn.discordapp.com/attachments/647753999948185611/647754112661848094/2a8e119d-e266-40d3-a9c8-a92194b658472Fatt.png"
                 )
                 await channel.send(embed=embeds.global_embed)
+                await channel.send(embed=embeds.global_embed2)
                 await channel.send(
                     "https://cdn.discordapp.com/attachments/647753999948185611/647754128541614090/2a8e119d-e266-40d3-a9c8-a92194b658472Fchannel_rules.png"
                 )
