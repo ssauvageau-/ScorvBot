@@ -10,7 +10,7 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
-REMOVE_WHITELIST = {"Admin", "Moderator", "Janitor"}
+REMOVE_WHITELIST = ["Admin", "Moderator", "Janitor"]
 
 
 @app_commands.guild_only()
@@ -36,17 +36,10 @@ class TagSystemGroup(app_commands.Group, name="tag"):
 
     def encode_tag_data(self, data: str) -> str:
         return base64.b64encode(data.encode("utf-8")).decode("utf-8")
-    
+
     def decode_tag_data(self, data: str) -> str:
         return base64.b64decode(data.encode("utf-8")).decode("utf-8")
 
-    @app_commands.command(name="post", description="Post a tag in chat.")
-    async def post_tag(self, interaction: discord.Interaction, choice: str):
-        data = self.tag_dict[choice]["data"]
-        decoded_data = self.decode_tag_data(data)
-        await interaction.response.send_message(decoded_data)
-
-    @post_tag.autocomplete("choice")
     async def tag_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> List[app_commands.Choice[str]]:
@@ -56,6 +49,13 @@ class TagSystemGroup(app_commands.Group, name="tag"):
             for choice in choices
             if current.lower() in choice.lower()
         ]
+
+    @app_commands.command(name="post", description="Post a tag in chat.")
+    @app_commands.autocomplete(choice=tag_autocomplete)
+    async def post_tag(self, interaction: discord.Interaction, choice: str):
+        data = self.tag_dict[choice]["data"]
+        decoded_data = self.decode_tag_data(data)
+        await interaction.response.send_message(decoded_data)
 
     @app_commands.command(name="submit", description="Submit a new tag for review.")
     async def submit_tag(
@@ -81,13 +81,10 @@ class TagSystemGroup(app_commands.Group, name="tag"):
             return
 
     @app_commands.command(name="remove", description="Remove a tag")
+    @app_commands.autocomplete(tag=tag_autocomplete)
+    @app_commands.checks.has_any_role(REMOVE_WHITELIST)
     async def remove_tag(self, interaction: discord.Interaction, tag: str):
         # TODO - Extract deletion to confirmation dialog buttons?
-        if REMOVE_WHITELIST.isdisjoint({role.name for role in interaction.user.roles}):
-            await interaction.response.send_message(
-                "Insufficient privileges for tag removal, sorry!", ephemeral=True
-            )
-            return
         tag_clean = tag.strip()
         if tag_clean in self.tag_dict:
             # Deep clone in place so as not to interfere with other async funcs that may be reading dict at time
@@ -99,7 +96,21 @@ class TagSystemGroup(app_commands.Group, name="tag"):
                 "Tag successfully removed.", ephemeral=True
             )
 
-    async def create_approval_buttons(self, submission: discord.Interaction, tag: str, data: str):
+    @remove_tag.error
+    async def remove_tag_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
+        if isinstance(error, app_commands.errors.MissingAnyRole):
+            await interaction.response.send_message(
+                "You do not have the required permissions to run this command!",
+                ephemeral=True,
+            )
+        else:
+            raise error
+
+    async def create_approval_buttons(
+        self, submission: discord.Interaction, tag: str, data: str
+    ):
         buttons = discord.ui.View(timeout=None)
         approval_button = Button(
             style=discord.ButtonStyle.green,
@@ -113,7 +124,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         async def approval_callback(interaction: discord.Interaction):
             # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
             await submission.user.send(
-                f'Your tag: `{tag}` has been approved on the Grim Dawn server!'
+                f"Your tag: `{tag}` has been approved on the Grim Dawn server!"
             )
             await interaction.message.channel.send(
                 f"Tag `{tag}` approved by {interaction.user}."
@@ -141,7 +152,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         async def deny_callback(interaction: discord.Interaction):
             # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
             await submission.user.send(
-                f'Your tag: `{tag}` has been denied on the Grim Dawn server.'
+                f"Your tag: `{tag}` has been denied on the Grim Dawn server."
             )
             await interaction.message.channel.send(
                 f"Tag `{tag}` denied by {interaction.user}."
