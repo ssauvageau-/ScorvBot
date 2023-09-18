@@ -34,9 +34,17 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         with open(self.tag_json_path, "w", encoding="utf-8") as disk_lib:
             disk_lib.write(json.dumps(self.tag_dict, sort_keys=True))
 
+    def encode_tag_data(self, data: str) -> str:
+        return base64.b64encode(data.encode("utf-8")).decode("utf-8")
+    
+    def decode_tag_data(self, data: str) -> str:
+        return base64.b64decode(data.encode("utf-8")).decode("utf-8")
+
     @app_commands.command(name="post", description="Post a tag in chat.")
     async def post_tag(self, interaction: discord.Interaction, choice: str):
-        await interaction.response.send_message(str(self.tag_dict[choice]["data"]))
+        data = self.tag_dict[choice]["data"]
+        decoded_data = self.decode_tag_data(data)
+        await interaction.response.send_message(decoded_data)
 
     @post_tag.autocomplete("choice")
     async def tag_autocomplete(
@@ -57,7 +65,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         content_clean = content.strip()
         if tag_clean in self.tag_dict:
             await interaction.response.send_message(
-                f"Tag {tag_clean} already exists!", ephemeral=True
+                f"Tag `{tag_clean}` already exists!", ephemeral=True
             )
             return
         else:  # redundant but indented for clarity
@@ -68,7 +76,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
                 ),
             )
             await interaction.response.send_message(
-                f"Tag {tag_clean} has been submitted for review.", ephemeral=True
+                f"Tag `{tag_clean}` has been submitted for review.", ephemeral=True
             )
             return
 
@@ -91,7 +99,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
                 "Tag successfully removed.", ephemeral=True
             )
 
-    async def create_approval_buttons(self, submission: discord.Interaction, tag, data):
+    async def create_approval_buttons(self, submission: discord.Interaction, tag: str, data: str):
         buttons = discord.ui.View(timeout=None)
         approval_button = Button(
             style=discord.ButtonStyle.green,
@@ -105,13 +113,14 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         async def approval_callback(interaction: discord.Interaction):
             # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
             await submission.user.send(
-                f'Your tag: "!{tag}" has been approved on the Grim Dawn server!'
+                f'Your tag: `{tag}` has been approved on the Grim Dawn server!'
             )
             await interaction.message.channel.send(
-                f"Tag {tag} approved by {interaction.user}."
+                f"Tag `{tag}` approved by {interaction.user}."
             )
+            encoded_data = self.encode_tag_data(data)
             self.tag_dict[tag] = {
-                "data": data,
+                "data": encoded_data,
                 "author": interaction.user.name,
                 "creation": interaction.created_at.strftime("%a %d %b %Y, %I:%M%p %Z"),
             }
@@ -132,10 +141,10 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         async def deny_callback(interaction: discord.Interaction):
             # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
             await submission.user.send(
-                f'Your tag: "!{tag}" has been denied on the Grim Dawn server.'
+                f'Your tag: `{tag}` has been denied on the Grim Dawn server.'
             )
             await interaction.message.channel.send(
-                f"Tag {tag} denied by {interaction.user}."
+                f"Tag `{tag}` denied by {interaction.user}."
             )
             await interaction.message.delete()
 
