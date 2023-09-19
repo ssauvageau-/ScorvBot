@@ -5,9 +5,8 @@ from discord.ext import commands
 from discord.flags import Intents
 from dotenv import load_dotenv
 
-from commands.misc import MiscCommandGroup
 from commands.moderation import ModerationCommandCog
-from commands.announcements import AnnouncementCommandCog
+from commands.announcements import AnnouncementCommandGroup
 from commands.assign_role import AssignRoleCommandGroup
 from commands.tags import TagSystemGroup
 from events import Events
@@ -28,10 +27,9 @@ class ScorvBot(commands.Bot):
         # Add command cogs here
         await self.add_cog(Events(self))
         await self.add_cog(ModerationCommandCog(self))
-        await self.add_cog(AnnouncementCommandCog(self))
 
         # Add application command groups here
-        self.tree.add_command(MiscCommandGroup(self))
+        self.tree.add_command(AnnouncementCommandGroup(self))
         self.tree.add_command(AssignRoleCommandGroup(self))
         self.tree.add_command(TagSystemGroup(self))
 
