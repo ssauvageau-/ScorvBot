@@ -6,12 +6,12 @@ import os
 
 
 @app_commands.guild_only()
-class MobileCommandGroup(app_commands.Group, name="mobile"):
+class MiscCommandCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         super().__init__()
 
-    @app_commands.command(name="-")
+    @app_commands.command(name="mobile")
     async def mobile_image(self, interaction: discord.Interaction, user: discord.User):
         avatar = user.avatar
         if not avatar.is_animated():
@@ -28,7 +28,9 @@ class MobileCommandGroup(app_commands.Group, name="mobile"):
             mobile_discord.paste(iresize, (x1, y1, x2, y2), mask)
             mobile_discord.save(fn_o)
 
-            await interaction.response.send_message(file=discord.File(fp="mobile_output.png"))
+            await interaction.response.send_message(
+                file=discord.File(fp="mobile_output.png")
+            )
 
             if os.path.exists(fn):
                 os.remove(fn)

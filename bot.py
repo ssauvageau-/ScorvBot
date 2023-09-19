@@ -9,7 +9,7 @@ from commands.moderation import ModerationCommandCog
 from commands.announcements import AnnouncementCommandGroup
 from commands.assign_role import AssignRoleCommandGroup
 from commands.tags import TagSystemGroup
-from commands.mobile import MobileCommandGroup
+from commands.misc import MiscCommandCog
 from events import Events
 
 load_dotenv()
@@ -28,12 +28,12 @@ class ScorvBot(commands.Bot):
         # Add command cogs here
         await self.add_cog(Events(self))
         await self.add_cog(ModerationCommandCog(self))
+        await self.add_cog(MiscCommandCog(self))
 
         # Add application command groups here
         self.tree.add_command(AnnouncementCommandGroup(self))
         self.tree.add_command(AssignRoleCommandGroup(self))
         self.tree.add_command(TagSystemGroup(self))
-        self.tree.add_command(MobileCommandGroup(self))
 
         self.tree.copy_global_to(guild=TEST_GUILD)
         await self.tree.sync(guild=TEST_GUILD)
