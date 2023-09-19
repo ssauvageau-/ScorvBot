@@ -15,39 +15,33 @@ class MiscCommandCog(commands.Cog):
     async def mobile_image(self, interaction: discord.Interaction, user: discord.User):
         avatar = user.avatar
         fn = str(user.id) + "_temp"
-        fn_o = "mobile_output"
-        if avatar.is_animated():
-            fn_o = f"{fn_o}.gif"
-            frame_list = []
-            await avatar.save(fn)
-            with Image.open(fn) as im:
-                idx = 1
-                duration = 0
+        fn_o = "mobile_output.gif"
+        frame_list = []
+        await avatar.save(fn)
+        with Image.open(fn) as im:
+            idx = 1
+            duration = 0
 
-                for frame in ImageSequence.Iterator(im):
-                    frame_list.append(self.build_mobile_frame(frame))
-                    idx += 1
+            for frame in ImageSequence.Iterator(im):
+                frame_list.append(self.build_mobile_frame(frame))
+                idx += 1
+                try:
                     duration += im.info["duration"]
+                except KeyError:
+                    continue
 
-                frame_duration = int(idx / duration)
+            frame_duration = int(idx / duration) if duration > 0 else 1000
 
-            frame_list[0].save(
-                fn_o,
-                save_all=True,
-                append_images=frame_list[1:],
-                optimize=False,
-                duration=frame_duration,
-                loop=0,
-            )
+        frame_list[0].save(
+            fn_o,
+            save_all=True,
+            append_images=frame_list[1:],
+            optimize=False,
+            duration=frame_duration,
+            loop=0,
+        )
 
-            await interaction.response.send_message(file=discord.File(fp=fn_o))
-        else:
-            fn = f"{fn}.png"
-            fn_o = f"{fn_o}.png"
-            await avatar.save(fn)
-            icon = Image.open(fn)
-            self.build_mobile_frame(icon).save(fn_o)
-            await interaction.response.send_message(file=discord.File(fp=fn_o))
+        await interaction.response.send_message(file=discord.File(fp=fn_o))
 
         if os.path.exists(fn):
             os.remove(fn)
