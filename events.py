@@ -9,13 +9,6 @@ class Events(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(name="f", description="Pay respects. 'to' is optional.")
-    async def f_event(self, interaction: discord.Interaction, to: str = None):
-        if to:
-            await interaction.response.send_message(f"Press 🇫 to pay respects to {to}.")
-        else:
-            await interaction.response.send_message("Press 🇫 to pay respects.")
-
     @commands.Cog.listener(name="on_message")
     async def nerd_event(self, message: discord.Message):
         if message.author == self.bot.user:

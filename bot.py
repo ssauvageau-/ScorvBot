@@ -9,7 +9,7 @@ from commands.moderation import ModerationCommandCog
 from commands.announcements import AnnouncementCommandGroup
 from commands.assign_role import AssignRoleCommandGroup
 from commands.tags import TagSystemGroup
-from commands.mobile import MiscCommandCog
+from commands.misc import MiscCommandCog
 from events import Events
 
 load_dotenv()

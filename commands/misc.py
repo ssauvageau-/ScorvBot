@@ -1,8 +1,10 @@
+import os
+from typing import Optional
+
 from PIL import Image, ImageSequence
 import discord
 from discord import app_commands
 from discord.ext import commands
-import os
 
 
 @app_commands.guild_only()
@@ -10,6 +12,17 @@ class MiscCommandCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         super().__init__()
+
+    @app_commands.command(name="f", description="Pay respects. 'to' is optional.")
+    async def pay_respects(
+        self, interaction: discord.Interaction, to: Optional[str] = None
+    ):
+        if to:
+            await interaction.response.send_message(f"Press 🇫 to pay respects to {to}.")
+        else:
+            await interaction.response.send_message("Press 🇫 to pay respects.")
+        response = await interaction.original_response()
+        await response.add_reaction("🇫")
 
     @app_commands.command(name="mobile")
     async def mobile_image(self, interaction: discord.Interaction, user: discord.User):
