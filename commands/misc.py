@@ -27,13 +27,18 @@ class MiscCommandCog(commands.Cog):
                     # frame.save(name)
                     frame_list.append(self.build_mobile_frame(frame))
                     idx += 1
-                    duration += im.info['duration']
-                frame_duration = int(idx/duration)
-            frame_list[0].save(fn_o, save_all=True, append_images=frame_list[1:], optimize=False, duration=frame_duration, loop=0)
-
-            await interaction.response.send_message(
-                file=discord.File(fp=fn_o)
+                    duration += im.info["duration"]
+                frame_duration = int(idx / duration)
+            frame_list[0].save(
+                fn_o,
+                save_all=True,
+                append_images=frame_list[1:],
+                optimize=False,
+                duration=frame_duration,
+                loop=0,
             )
+
+            await interaction.response.send_message(file=discord.File(fp=fn_o))
 
             if os.path.exists(fn):
                 os.remove(fn)
@@ -52,9 +57,7 @@ class MiscCommandCog(commands.Cog):
             icon = Image.open(fn)
             self.build_mobile_frame(icon).save(fn_o)
 
-            await interaction.response.send_message(
-                file=discord.File(fp=fn_o)
-            )
+            await interaction.response.send_message(file=discord.File(fp=fn_o))
 
             if os.path.exists(fn):
                 os.remove(fn)
