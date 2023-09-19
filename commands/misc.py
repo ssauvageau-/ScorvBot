@@ -18,7 +18,9 @@ class MiscCommandCog(commands.Cog):
         self, interaction: discord.Interaction, to: Optional[str] = None
     ):
         if to:
-            await interaction.response.send_message(f"Press 🇫 to pay respects to {to}.")
+            await interaction.response.send_message(
+                f"Press 🇫 to pay respects to {to}{'' if to.endswith('.') else '.'}"
+            )
         else:
             await interaction.response.send_message("Press 🇫 to pay respects.")
         response = await interaction.original_response()
