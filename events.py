@@ -1,12 +1,20 @@
 import random
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+
+    @app_commands.command(name="f", description="Pay respects. 'to' is optional.")
+    async def f_event(self, interaction: discord.Interaction, to: str = None):
+        if to:
+            await interaction.response.send_message(f"Press 🇫 to pay respects to {to}.")
+        else:
+            await interaction.response.send_message("Press 🇫 to pay respects.")
 
     @commands.Cog.listener(name="on_message")
     async def nerd_event(self, message: discord.Message):
@@ -31,6 +39,16 @@ class Events(commands.Cog):
                         "<a:crabPls:649476167266467842>",
                     ]
                 )
+            )
+
+    @commands.Cog.listener(name="on_message")
+    async def xpac_event(self, message: discord.Message):
+        if message.author == self.bot.user:
+            return
+
+        if "xpacwhen" in message.content.replace(" ", "").lower():
+            await message.reply(
+                content="https://cdn.discordapp.com/attachments/1151691325549322262/1153779612053159946/image.png"
             )
 
     @commands.Cog.listener(name="on_message")
