@@ -13,7 +13,7 @@ class MiscCommandCog(commands.Cog):
 
     @app_commands.command(name="mobile")
     async def mobile_image(self, interaction: discord.Interaction, user: discord.User):
-        avatar = user.avatar
+        avatar = user.display_avatar
         fn = str(user.id) + "_temp"
         fn_o = "mobile_output.gif"
         frame_list = []
