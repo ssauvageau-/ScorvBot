@@ -14,22 +14,18 @@ class MiscCommandCog(commands.Cog):
     @app_commands.command(name="mobile")
     async def mobile_image(self, interaction: discord.Interaction, user: discord.User):
         avatar = user.avatar
-        if not avatar.is_animated():
+        if avatar.is_animated():
+            return
+        else:
             fn = str(user.id) + "_temp.png"
             fn_o = "mobile_output.png"
             await avatar.save(fn)
 
-            mobile_discord = Image.open("images/MobileDiscord.png")
             icon = Image.open(fn)
-            iresize = icon.resize((43, 43), Image.LANCZOS)
-            x1, y1 = 221, 148
-            x2, y2 = 264, 191
-            mask = iresize.convert("RGBA")
-            mobile_discord.paste(iresize, (x1, y1, x2, y2), mask)
-            mobile_discord.save(fn_o)
+            self.build_mobile_frame(icon, fn_o)
 
             await interaction.response.send_message(
-                file=discord.File(fp="mobile_output.png")
+                file=discord.File(fp=fn_o)
             )
 
             if os.path.exists(fn):
@@ -40,3 +36,13 @@ class MiscCommandCog(commands.Cog):
                 os.remove(fn_o)
             else:
                 print(f"Error occurred when deleting file:\t{fn_o}")
+
+    def build_mobile_frame(self, icon, output_fn):
+        mobile_discord = Image.open("images/MobileDiscord.png")
+        iresize = icon.resize((43, 43), Image.LANCZOS)
+        x1, y1 = 221, 148
+        x2, y2 = 264, 191
+        mask = iresize.convert("RGBA")
+        mobile_discord.paste(iresize, (x1, y1, x2, y2), mask)
+        mobile_discord.save(output_fn)
+        return output_fn
