@@ -73,6 +73,7 @@ class Events(commands.Cog):
             "🤔⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️🇧🇦": f"{message.author.mention} is a nerd! 🤓",
             "<:thonking:327364004211064832><:thonking:327364004211064832>": "<a:thonkered:540696116069400607>",
             "🤔🐦": "<:mayayy:1153451055657517077>",
+            "🤔🔥": "<:finethink:1153504940178817034>",
         }
 
         pruned = message.content.replace(" ", "")
