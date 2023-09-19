@@ -3,8 +3,6 @@ from discord import app_commands
 from discord.ext import commands
 import embeds
 
-COMMAND_WHITELIST = ["Admin", "Moderator"]
-
 
 @app_commands.guild_only()
 class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
@@ -14,7 +12,7 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
 
     @app_commands.command(name="post-rules", description="Post the generated rules")
     @app_commands.describe(channel="The channel in which to post the rules")
-    @app_commands.checks.has_any_role(COMMAND_WHITELIST)
+    @app_commands.checks.has_any_role("Admin", "Moderator")
     async def post_rules(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
@@ -51,7 +49,7 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
 
     @app_commands.command(name="post-links", description="Post the generated links")
     @app_commands.describe(channel="The channel in which to post the links")
-    @app_commands.checks.has_any_role(COMMAND_WHITELIST)
+    @app_commands.checks.has_any_role("Admin", "Moderator")
     async def post_links(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):

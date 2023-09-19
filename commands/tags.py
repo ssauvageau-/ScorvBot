@@ -10,8 +10,6 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
-REMOVE_WHITELIST = ["Admin", "Moderator", "Janitor"]
-
 
 @app_commands.guild_only()
 class TagSystemGroup(app_commands.Group, name="tag"):
@@ -82,7 +80,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
 
     @app_commands.command(name="remove", description="Remove a tag")
     @app_commands.autocomplete(tag=tag_autocomplete)
-    @app_commands.checks.has_any_role(REMOVE_WHITELIST)
+    @app_commands.checks.has_any_role("Admin", "Moderator", "Janitor")
     async def remove_tag(self, interaction: discord.Interaction, tag: str):
         # TODO - Extract deletion to confirmation dialog buttons?
         tag_clean = tag.strip()
