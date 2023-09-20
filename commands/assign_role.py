@@ -16,7 +16,8 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
         super().__init__()
 
     @app_commands.command(
-        name="mastery", description="Represent your favorite mastery!"
+        name="mastery",
+        description="Represent your favorite mastery! Choosing the same role again removes the role.",
     )
     @app_commands.describe(mastery="The mastery role you want")
     async def assign_mastery_role(
@@ -52,7 +53,8 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
         )
 
     @app_commands.command(
-        name="pings", description="Choose which news pings you'd like to receive"
+        name="pings",
+        description="Choose which news pings you'd like to receive. Choosing the same role again removes the role.",
     )
     @app_commands.describe(ping_role="The announcement ping role you want")
     @app_commands.rename(ping_role="role")
