@@ -85,6 +85,8 @@ class Events(commands.Cog):
             "<:thonking:327364004211064832><:thonking:327364004211064832>": "<a:thonkered:540696116069400607>",
             "🤔🐦": "<:mayayy:1153451055657517077>",
             "🤔🔥": "<:finethink:1153504940178817034>",
+            "<:kappaScorv:562136888731762688><:kappaScorv:562136888731762688>": "<:scorvChaos:655350057205235712>",
+            "<:kappaScorv:562136888731762688>🔫": "<:scorvgun:792202763379015681>",
         }
 
         pruned = message.content.replace(" ", "")
