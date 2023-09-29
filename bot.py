@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from commands.moderation import ModerationCommandCog
 from commands.announcements import AnnouncementCommandGroup
 from commands.assign_role import AssignRoleCommandGroup
+from commands.graph_roles import GraphRoleCommandGroup
 from commands.tags import TagSystemGroup
 from commands.misc import MiscCommandCog
 from events import Events
@@ -34,6 +35,7 @@ class ScorvBot(commands.Bot):
         self.tree.add_command(AnnouncementCommandGroup(self))
         self.tree.add_command(AssignRoleCommandGroup(self))
         self.tree.add_command(TagSystemGroup(self))
+        self.tree.add_command(GraphRoleCommandGroup(self))
 
         self.tree.copy_global_to(guild=TEST_GUILD)
         await self.tree.sync(guild=TEST_GUILD)
