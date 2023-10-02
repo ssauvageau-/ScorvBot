@@ -20,6 +20,11 @@ class TagSystemGroup(app_commands.Group, name="tag"):
             self.tag_dict = self.load_tags()
         except json.decoder.JSONDecodeError:
             self.tag_dict = {}
+        except FileNotFoundError:
+            self.tag_dict = {}
+            if not os.path.exists("json"):
+                os.makedirs("json")
+            os.close(os.open(self.tag_json_path, os.O_CREAT))
         self.approval_channel = os.getenv("TAG_APPROVAL_ID")
         self.bot = bot
         super().__init__()

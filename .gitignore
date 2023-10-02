@@ -8,3 +8,4 @@ venv/
 *.log
 *.edn
 __pycache__/
+json/
