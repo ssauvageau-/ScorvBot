@@ -11,6 +11,7 @@ from commands.assign_role import AssignRoleCommandGroup
 from commands.graph_roles import GraphRoleCommandGroup
 from commands.tags import TagSystemGroup
 from commands.misc import MiscCommandCog
+from commands.raffle import RaffleCommandGroup
 from events import Events
 
 load_dotenv()
@@ -36,6 +37,7 @@ class ScorvBot(commands.Bot):
         self.tree.add_command(AssignRoleCommandGroup(self))
         self.tree.add_command(TagSystemGroup(self))
         self.tree.add_command(GraphRoleCommandGroup(self))
+        self.tree.add_command(RaffleCommandGroup(self))
 
         self.tree.copy_global_to(guild=TEST_GUILD)
         await self.tree.sync(guild=TEST_GUILD)
