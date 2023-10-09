@@ -5,7 +5,9 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from enums import MasteryRoles, PingRoles
+from typing import Dict, List
+
+from enums import PingRoles
 
 
 @app_commands.guild_only()
@@ -13,18 +15,62 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
     def __init__(self, bot: commands.Bot):
         load_dotenv()
         self.bot = bot
+        self.MasteryRoles = (
+            "Soldier",
+            "Demolitionist",
+            "Occultist",
+            "Nightblade",
+            "Arcanist",
+            "Shaman",
+            "Inquisitor",
+            "Necromancer",
+            "Oathkeeper",
+        )
+        self.PingRoles = ("Game News Pings", "Server News Pings")
         super().__init__()
+
+    async def mastery_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
+        choices = self.MasteryRoles
+        return [
+            app_commands.Choice(name=choice, value=choice)
+            for choice in choices
+            if current.lower() in choice.lower()
+        ]
+
+    async def news_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
+        choices = self.PingRoles
+        return [
+            app_commands.Choice(name=choice, value=choice)
+            for choice in choices
+            if current.lower() in choice.lower()
+        ]
 
     @app_commands.command(
         name="mastery",
         description="Represent your favorite mastery! Choosing the same role again removes the role.",
     )
-    @app_commands.describe(mastery="The mastery role you want")
-    async def assign_mastery_role(
-        self, interaction: discord.Interaction, mastery: MasteryRoles
-    ):
+    @app_commands.describe(choice="The mastery role you want")
+    @app_commands.autocomplete(choice=mastery_autocomplete)
+    @app_commands.rename(choice="mastery")
+    async def assign_mastery_role(self, interaction: discord.Interaction, choice: str):
         user = interaction.user
-        mastery_role_id = int(os.getenv(mastery.value))
+        role_scuffed = interaction.guild.roles
+        roles = {}
+        # guild.roles returns a scuffed object class so we convert it to dict for ease of use
+        for x in role_scuffed:
+            roles[x.name] = x.id
+        if choice in roles:
+            mastery = choice
+            mastery_role_id = roles[choice]
+        else:
+            print(
+                f"Server {interaction.guild} not configured to accept choice {choice}!"
+            )
+            return
 
         # Check if the user already has the role that they're asking for
         mastery_role = user.get_role(mastery_role_id)
@@ -33,36 +79,50 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
                 mastery_role, reason="Unassigning existing master role"
             )
             await interaction.response.send_message(
-                f"Unassigned the {mastery.name} role!", ephemeral=True
+                f"Unassigned the {mastery} role!", ephemeral=True
             )
             return
 
         # If the user already has a mastery role remove it
-        for item in MasteryRoles:
-            role_id = int(os.getenv(item.value))
-            role = user.get_role(role_id)
-            if role is not None:
-                await user.remove_roles(role, reason="Removing existing master role(s)")
+        for item in self.MasteryRoles:
+            if item in roles:
+                role_id = roles[item]
+                role = user.get_role(role_id)
+                if role is not None:
+                    await user.remove_roles(
+                        role, reason="Removing existing master role(s)"
+                    )
 
         # Assign new mastery role to user
         mastery_role = interaction.guild.get_role(mastery_role_id)
         await user.add_roles(mastery_role, reason="Assigning new mastery role")
 
         await interaction.response.send_message(
-            f"Assigned the {mastery.name} role!", ephemeral=True
+            f"Assigned the {mastery} role!", ephemeral=True
         )
 
     @app_commands.command(
         name="pings",
         description="Choose which news pings you'd like to receive. Choosing the same role again removes the role.",
     )
-    @app_commands.describe(ping_role="The announcement ping role you want")
-    @app_commands.rename(ping_role="role")
-    async def assign_ping_role(
-        self, interaction: discord.Interaction, ping_role: PingRoles
-    ):
+    @app_commands.describe(choice="The announcement ping role you want")
+    @app_commands.autocomplete(choice=news_autocomplete)
+    @app_commands.rename(choice="role")
+    async def assign_ping_role(self, interaction: discord.Interaction, choice: str):
         user = interaction.user
-        ping_role_id = int(os.getenv(ping_role.value))
+        role_scuffed = interaction.guild.roles
+        roles = {}
+        # guild.roles returns a scuffed object class so we convert it to dict for ease of use
+        for x in role_scuffed:
+            roles[x.name] = x.id
+        if choice in roles:
+            ping_role = choice
+            ping_role_id = roles[choice]
+        else:
+            print(
+                f"Server {interaction.guild} not configured to accept choice {choice}!"
+            )
+            return
 
         # Unassign the role if the user already has it
         user_ping_role = user.get_role(ping_role_id)
@@ -71,7 +131,7 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
                 user_ping_role, reason="Unassigning existing ping role"
             )
             await interaction.response.send_message(
-                f"Unassigned the {ping_role.name} role!", ephemeral=True
+                f"Unassigned the {ping_role} role!", ephemeral=True
             )
             return
 
@@ -80,5 +140,5 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
         await user.add_roles(guild_ping_role, reason="Assigning new ping role")
 
         await interaction.response.send_message(
-            f"Assigned the {ping_role.name} role!", ephemeral=True
+            f"Assigned the {ping_role} role!", ephemeral=True
         )
