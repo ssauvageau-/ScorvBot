@@ -10,12 +10,24 @@ class Events(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener(name="on_message")
+    async def fish_event(self, message: discord.Message):
+        if message.author == self.bot.user:
+            return
+
+        if message.author.id in (
+            225337962521427968,
+            274230000935370763,
+        ):  # Zantai, mad_lee
+            if random.randint(1, 200) == 69:
+                await message.channel.send("<:lawyerfish:1156268220546826321>")
+
+    @commands.Cog.listener(name="on_message")
     async def nerd_event(self, message: discord.Message):
         if message.author == self.bot.user:
             return
 
-        if message.content == "nerd":
-            await message.channel.send("nerd")
+        if message.content.lower() == "nerd":
+            await message.channel.send(message.content)
             await message.delete()
 
     @commands.Cog.listener(name="on_message")
@@ -68,7 +80,7 @@ class Events(commands.Cog):
             "🤔💦": "<:thinkdrops:359821539392225291>",
             "🤔🤔": "<:thinkception:359822479147008000>",
             "🤔⬜": "<:squarethink:359821163817467904>",
-            "🤔🥔": "<:spudthink:347098778647658515>",
+            "🤔🥔": "<:spudthink:1160997520474902569>",
             "🤔🦀": "<:crabthink:362671199228002304>",
             "🤔🎩": "<:mthinking:359821640340733952>",
             "🤔👈": "<:leftythink:359821079264624640>",
