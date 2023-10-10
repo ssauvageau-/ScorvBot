@@ -20,6 +20,25 @@ class Events(commands.Cog):
         ):  # Zantai, mad_lee
             if random.randint(1, 200) == 69:
                 await message.channel.send("<:lawyerfish:1156268220546826321>")
+        elif message.author.id in (
+            434082239706431508,  # Maska
+            136586501436735488,  # Ceno
+            297721856130154497,  # Mergo
+            587334964257751053,  # Avyctes
+            406040451850698752,  # Snazzymoistboi
+        ):
+            if random.randint(1, 500) == 69:
+                await message.channel.send("<:lawyerfish:1156268220546826321>")
+
+    @commands.Cog.listener(name="on_message")
+    async def tomo_event(self, message: discord.Message):
+        if message.author == self.bot.user:
+            return
+        if message.author.id == 255472765434331147:
+            if random.randint(1, 100) == 69:
+                stickers = message.guild.stickers
+                tomo = [sticker for sticker in stickers if sticker.name == "tomodak"]
+                await message.channel.send(stickers=tomo)
 
     @commands.Cog.listener(name="on_message")
     async def nerd_event(self, message: discord.Message):
