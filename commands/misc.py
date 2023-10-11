@@ -42,13 +42,13 @@ class MiscCommandCog(commands.Cog):
         channel = guild.get_channel(channel_id)
         message = await channel.fetch_message(message_id)
         tmp_embed = discord.Embed(
-            title=f"Quote: {message.author.name}", color=message.author.color
+            color=message.author.color, timestamp=message.created_at
         )
         tmp_embed.add_field(name="", value=message.content, inline=False)
-        tmp_embed.add_field(
-            name="", value=message.created_at.strftime("%m/%d/%Y, %H:%M:%S UTC")
+        tmp_embed.set_footer(text=channel.name)
+        tmp_embed.set_author(
+            name=message.author.name, icon_url=message.author.avatar, url=link
         )
-        tmp_embed.set_thumbnail(url=message.author.avatar)
         await interaction.response.send_message(embed=tmp_embed)
 
     @app_commands.command(name="mobile")
