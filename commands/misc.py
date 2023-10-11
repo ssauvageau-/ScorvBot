@@ -28,6 +28,29 @@ class MiscCommandCog(commands.Cog):
         response = await interaction.original_response()
         await response.add_reaction("🇫")
 
+    @app_commands.command(
+        name="quote", description="Quote a previous message through the bot."
+    )
+    async def quote(self, interaction: discord.Interaction, link: str):
+        # https: // discord.com / channels / 119758608765288449 / 428832869398347776 / 1161002383996883058
+        # 119758608765288449 / 428832869398347776 / 1161002383996883058
+        # GUILD / CHANNEL / MESSAGE
+        msg = link.split("/")
+        guild = interaction.guild
+        channel_id = int(msg[5])
+        message_id = int(msg[6])
+        channel = guild.get_channel(channel_id)
+        message = await channel.fetch_message(message_id)
+        tmp_embed = discord.Embed(
+            title=f"Quote: {message.author.name}", color=message.author.color
+        )
+        tmp_embed.add_field(name="", value=message.content, inline=False)
+        tmp_embed.add_field(
+            name="", value=message.created_at.strftime("%m/%d/%Y, %H:%M:%S UTC")
+        )
+        tmp_embed.set_thumbnail(url=message.author.avatar)
+        await interaction.response.send_message(embed=tmp_embed)
+
     @app_commands.command(name="mobile")
     async def mobile_image(self, interaction: discord.Interaction, user: discord.User):
         avatar = user.display_avatar
