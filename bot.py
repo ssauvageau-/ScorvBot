@@ -12,6 +12,7 @@ from commands.graph_roles import GraphRoleCommandGroup
 from commands.tags import TagSystemGroup
 from commands.misc import MiscCommandCog
 from commands.raffle import RaffleCommandGroup
+from commands.tasks import TaskCog
 from events import Events
 
 load_dotenv()
@@ -31,6 +32,7 @@ class ScorvBot(commands.Bot):
         await self.add_cog(Events(self))
         await self.add_cog(ModerationCommandCog(self))
         await self.add_cog(MiscCommandCog(self))
+        await self.add_cog(TaskCog(self))
 
         # Add application command groups here
         self.tree.add_command(AnnouncementCommandGroup(self))
