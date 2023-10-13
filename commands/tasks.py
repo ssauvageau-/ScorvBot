@@ -1,7 +1,7 @@
-import datetime
 import os
 
-import discord.channel
+import discord
+import datetime
 from discord import app_commands
 from discord.ext import tasks, commands
 from dotenv import load_dotenv
@@ -29,21 +29,35 @@ class TaskCog(commands.Cog):
 
     @tasks.loop(seconds=1, count=1)
     async def test(self):
+        await self.bot.wait_until_ready()
         guild = await self.bot.fetch_guild(self.guild_prime)
-        channels = await guild.fetch_channels()
-        forums = []
-        for channel in channels:
-            if type(channel) is discord.channel.ForumChannel:
-                if channel.name == "trade" or channel.name == "searching-players":
-                    forums.append(channel)
-        for channel in forums:
-            async for thread in channel.archived_threads():
-                print(thread)
-            for thread in channel.threads:
-                print(thread)
-        # print("Test message every second.")
-        # channel = await self.bot.fetch_channel(1151153113340837941)
-        # await channel.send("Test message every two seconds, three times.")
+
+        """
+        This will run and get all threads with 'complete' in the title or that are older than 14 days.
+        """
+        # threads = await guild.active_threads()
+        # currtime = datetime.datetime.now(tz=utc)
+        # for thread in threads:
+        #     diff = currtime - thread.created_at
+        #     diff_s = diff.total_seconds()
+        #     days = divmod(diff_s, 86400)  # 86400 seconds in a day
+        #     if "complete" in thread.name.lower() or days[0] > 14:
+        #         print(thread, await self.bot.fetch_user(thread.owner_id))
+
+        """
+        This will run and get any "old" (by discord's definition) threads.
+        """
+        # channels = await guild.fetch_channels()
+        # forums = []
+        # for channel in channels:
+        #     if type(channel) is discord.channel.ForumChannel:
+        #         if channel.name == "trade" or channel.name == "searching-players":
+        #             forums.append(channel)
+        # for channel in forums:
+        #     async for thread in channel.archived_threads():
+        #         print(thread)  # works
+        #     for thread in channel.threads:
+        #         print(thread)  # doesn't work, channel properties not cached by runtime?
 
     @tasks.loop(time=times)
     async def batch_update(self):
