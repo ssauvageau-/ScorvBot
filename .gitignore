@@ -9,3 +9,4 @@ venv/
 *.edn
 __pycache__/
 json/
+.envrc

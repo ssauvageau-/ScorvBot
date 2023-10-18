@@ -250,6 +250,8 @@ links_embed.add_field(
     "\nhttps://www.reddit.com/r/Grimdawn/"
     "\nGrim Dawn Wikipedia"
     "\nhttps://grimdawn.fandom.com/wiki/Grim_Dawn_Wiki"
+    "\nGrim Dawn Community Highlights"
+    "\nhttps://www.grimdawn.com/community/"
     "\n"
     "\n**Useful Links**"
     "\nGrim Dawn Online Map"
