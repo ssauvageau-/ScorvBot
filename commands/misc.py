@@ -13,6 +13,7 @@ class MiscCommandCog(commands.Cog):
         self.bot = bot
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
+        self.log_channel = "scorv-log"
         super().__init__()
 
     @app_commands.command(name="f", description="Pay respects. 'to' is optional.")
@@ -27,6 +28,32 @@ class MiscCommandCog(commands.Cog):
             await interaction.response.send_message("Press 🇫 to pay respects.")
         response = await interaction.original_response()
         await response.add_reaction("🇫")
+
+    @app_commands.command(
+        name="scorv-post", description="Send a text message as Scorv! Limited access!"
+    )
+    @app_commands.checks.has_any_role(
+        "Admin", "Moderator", "Janitor", "Crate Entertainment"
+    )
+    async def scorv_post(self, interaction: discord.Interaction, message: str):
+        # is limited role access to this necessary given the moderation log channel setup?
+        # TODO unrelated here, but refactor tags/rules/links channels (#tag-approval, #rules, #links) to use this way
+        # TODO of finding channels by name instead of hardcoded channel IDs/passing ID as argument on call?
+        log = discord.utils.find(
+            lambda c: c.name == self.log_channel, interaction.guild.channels
+        )
+        if log:
+            await interaction.response.send_message(
+                "Sending your message below:", ephemeral=True
+            )
+            await interaction.channel.send(message)
+            await log.send(f"{interaction.user} sent a post as Scorv: {message}")
+            return
+        # else - log channel not found
+        await interaction.response.send_message(
+            "Could not find moderation log channel, cannot send anonymized message in public!",
+            ephemeral=True,
+        )
 
     @app_commands.command(
         name="quote", description="Quote a previous message through the bot."
