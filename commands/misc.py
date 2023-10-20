@@ -46,8 +46,8 @@ class MiscCommandCog(commands.Cog):
             await interaction.response.send_message(
                 "Sending your message below:", ephemeral=True
             )
-            await interaction.channel.send(message)
-            await log.send(f"{interaction.user} sent a post as Scorv: {message}")
+            post_message = await interaction.channel.send(message)
+            await log.send(f"{interaction.user} sent a post as Scorv: {message} -> {post_message.jump_url}")
             return
         # else - log channel not found
         await interaction.response.send_message(
