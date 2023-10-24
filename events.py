@@ -61,6 +61,7 @@ class Events(commands.Cog):
                         "🦀",
                         "<:crabDevotion:796803035904606250>",
                         "<a:crabPls:649476167266467842>",
+                        "<:crabdab:1166355233014829146>",
                     ]
                 )
             )
