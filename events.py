@@ -24,7 +24,7 @@ class Events(commands.Cog):
             434082239706431508,  # Maska
             136586501436735488,  # Ceno
             297721856130154497,  # Mergo
-            587334964257751053,  # Avyctes
+            # 587334964257751053,  # Avyctes
             406040451850698752,  # Snazzymoistboi
         ):
             if random.randint(1, 500) == 69:

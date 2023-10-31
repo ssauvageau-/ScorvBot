@@ -14,6 +14,7 @@ from commands.misc import MiscCommandCog
 from commands.raffle import RaffleCommandGroup
 from commands.tasks import TaskCog
 from events import Events
+from twitch_events import TwitchCog
 
 load_dotenv()
 TEST_GUILD_ID = os.getenv("TEST_GUILD")
@@ -33,6 +34,7 @@ class ScorvBot(commands.Bot):
         await self.add_cog(ModerationCommandCog(self))
         await self.add_cog(MiscCommandCog(self))
         await self.add_cog(TaskCog(self))
+        await self.add_cog(TwitchCog(self))
 
         # Add application command groups here
         self.tree.add_command(AnnouncementCommandGroup(self))
