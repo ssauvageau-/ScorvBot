@@ -1,9 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import os
+from typing import Dict
 
 import discord
-from discord import app_commands, Interaction, TextStyle
+from discord import app_commands, TextStyle
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -21,11 +22,20 @@ class TemporaryBanModal(discord.ui.Modal):
         required=True,
     )
 
-    def __init__(self, member: discord.Member):
+    def __init__(
+        self,
+        member: discord.Member,
+        log_channel_name: str,
+        json_path: str,
+        temp_bans: Dict[str, Dict],
+    ):
         super().__init__(title=f"Temporarily ban {member.display_name}")
         self.member = member
+        self.log_channel_name = log_channel_name
+        self.json_path = json_path
+        self.temp_bans = temp_bans
 
-    async def on_submit(self, interaction: Interaction):
+    async def on_submit(self, interaction: discord.Interaction):
         try:
             duration_days = int(self.duration.value)
         except ValueError:
@@ -41,14 +51,58 @@ class TemporaryBanModal(discord.ui.Modal):
             "ban_giver_username": interaction.user.name,
             "recipient_id": self.member.id,
             "recipient_username": self.member.name,
+            "recipient_roles": [role.name for role in self.member.roles],
             "reason": self.reason.value,
             "duration_days": duration_days,
             "ban_timestamp": ban_time.timestamp(),
             "ban_expiration_timestamp": ban_expiration.timestamp(),
         }
+        self.temp_bans[str(self.member.id)] = temp_ban
+        dump_json_db(self.json_path, self.temp_bans)
+
+        dm_embed = discord.Embed(
+            color=discord.Color.red(),
+            title="Temporarily Banned",
+            description=f"You have been banned from **{interaction.guild.name}** for **{duration_days} day(s)**. You will be notified when your ban expires if you allow messages from non-mutual server members.",
+            timestamp=ban_time,
+        )
+        dm_embed.set_thumbnail(url=interaction.guild.icon.url)
+        dm_embed.add_field(
+            name="Expiration date", value=f"<t:{int(ban_expiration.timestamp())}:f>"
+        )
+        dm_embed.add_field(name="Reason for ban", value=self.reason.value)
+
+        await self.member.send(embed=dm_embed)
+        await self.member.ban(reason=self.reason.value)
+
+        log_channel = discord.utils.find(
+            lambda c: c.name == self.log_channel_name, interaction.guild.channels
+        )
+        if log_channel is not None:
+            log_embed = discord.Embed(
+                color=discord.Color.red(), title="Temporary Ban", timestamp=ban_time
+            )
+            log_embed.set_author(
+                name=interaction.user.display_name,
+                icon_url=interaction.user.display_avatar,
+            )
+            log_embed.set_thumbnail(url=self.member.display_avatar)
+            log_embed.add_field(name="Member", value=self.member.mention, inline=True)
+            log_embed.add_field(
+                name="Duration", value=f"{duration_days} day(s)", inline=True
+            )
+            log_embed.add_field(
+                name="Expiration date",
+                value=f"<t:{int(ban_expiration.timestamp())}:f>",
+                inline=True,
+            )
+            log_embed.add_field(name="Reason for ban", value=self.reason.value)
+
+            await log_channel.send(embed=log_embed)
 
         await interaction.response.send_message(
-            f"```json\n{json.dumps(temp_ban, indent=1)}```"
+            f"Temporarily banned **{self.member.display_name}** for **{duration_days} day(s)**",
+            ephemeral=True,
         )
 
 
@@ -66,6 +120,7 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             if not os.path.exists("json"):
                 os.makedirs("json")
             os.close(os.open(self.temp_bans_json_path, os.O_CREAT))
+        self.log_channel_name = "scorv-log"
         self.bot = bot
         super().__init__()
 
@@ -74,45 +129,15 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
         description="Temporarily bans a member for a set number of days",
     )
     @app_commands.describe(member="The member to temporarily ban")
-    @app_commands.describe(reason="Reason for the temporary ban")
-    @app_commands.describe(duration="The number of whole days to temporarily ban")
-    @app_commands.checks.has_any_role("Admin", "Moderator", "Janitor")
-    async def temporary_ban_member(
-        self,
-        interaction: discord.Interaction,
-        member: discord.Member,
-        reason: str,
-        duration: int,
-    ):
-        ban_time = datetime.now()
-        ban_expiration = ban_time + timedelta(days=duration)
-        temp_ban = {
-            "ban_giver_id": interaction.user.id,
-            "ban_giver_username": interaction.user.name,
-            "recipient_id": member.id,
-            "recipient_username": member.name,
-            "reason": reason,
-            "duration_days": duration,
-            "ban_timestamp": ban_time.timestamp,
-            "ban_expiration_timestamp": ban_expiration.timestamp,
-        }
-        self.temp_bans_dict[member.id] = temp_ban
-        dump_json_db(self.temp_bans_json_path, self.temp_bans_dict)
-        await member.ban(reason=reason)
-
-        # TODO: send DM to user
-
-        # TODO: log ban in channel
-
-    # TODO: background unban & invite task
-
-    @app_commands.command(
-        name="temp-ban-modal",
-        description="Temporarily bans a member for a set number of days",
-    )
-    @app_commands.describe(member="The member to temporarily ban")
     @app_commands.checks.has_any_role("Admin", "Moderator", "Janitor")
     async def temporary_ban_member_modal(
         self, interaction: discord.Interaction, member: discord.Member
     ):
-        await interaction.response.send_modal(TemporaryBanModal(member=member))
+        await interaction.response.send_modal(
+            TemporaryBanModal(
+                member=member,
+                log_channel_name=self.log_channel_name,
+                json_path=self.temp_bans_json_path,
+                temp_bans=self.temp_bans_dict,
+            )
+        )
