@@ -13,6 +13,7 @@ from commands.tags import TagSystemGroup
 from commands.misc import MiscCommandCog
 from commands.raffle import RaffleCommandGroup
 from commands.tasks import TaskCog
+from commands.moderation_app_commands import ModerationCommandGroup
 from events import Events
 from twitch_events import TwitchCog
 
@@ -42,6 +43,7 @@ class ScorvBot(commands.Bot):
         self.tree.add_command(TagSystemGroup(self))
         self.tree.add_command(GraphRoleCommandGroup(self))
         self.tree.add_command(RaffleCommandGroup(self))
+        self.tree.add_command(ModerationCommandGroup(self))
 
         self.tree.copy_global_to(guild=TEST_GUILD)
         await self.tree.sync(guild=TEST_GUILD)

@@ -7,6 +7,7 @@ COMMAND_WHITELIST = {"Admin", "Moderator"}
 QUIT_WHITELIST = {"Admin"}
 
 
+# TODO: convert to app commands
 class ModerationCommandCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
