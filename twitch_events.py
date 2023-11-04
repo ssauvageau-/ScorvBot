@@ -114,9 +114,9 @@ class TwitchCog(commands.Cog):
         if len(stream_data["data"]) == 1:
             title = stream_data["data"][0]["title"]
             game = stream_data["data"][0]["game_name"]
-            if self.env is "prod":
+            if self.env == "prod":
                 guild = await self.bot.fetch_guild(self.guild_prime)
-            elif self.env is "dev":
+            elif self.env == "dev":
                 guild = await self.bot.fetch_guild(self.guild_test)
             channels = await guild.fetch_channels()
             tmp_embed = discord.Embed(color=discord.Color.gold())

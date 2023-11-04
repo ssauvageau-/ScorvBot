@@ -58,9 +58,9 @@ class TaskCog(commands.Cog):
     @tasks.loop(time=times)
     async def batch_update(self):
         await self.bot.wait_until_ready()
-        if self.env is "prod":
+        if self.env == "prod":
             guild = await self.bot.fetch_guild(self.guild_prime)
-        elif self.env is "dev":
+        elif self.env == "dev":
             guild = await self.bot.fetch_guild(self.guild_test)
 
         """
@@ -106,9 +106,9 @@ class TaskCog(commands.Cog):
     async def unban_temporary_bans(self):
         await self.bot.wait_until_ready()
 
-        if self.env is "prod":
+        if self.env == "prod":
             guild = await self.bot.fetch_guild(self.guild_prime)
-        elif self.env is "dev":
+        elif self.env == "dev":
             guild = await self.bot.fetch_guild(self.guild_test)
 
         channels = await guild.fetch_channels()

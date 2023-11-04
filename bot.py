@@ -46,10 +46,10 @@ class ScorvBot(commands.Bot):
         self.tree.add_command(RaffleCommandGroup(self))
         self.tree.add_command(ModerationCommandGroup(self))
 
-        if ENV is "dev":
+        if ENV == "dev":
             self.tree.copy_global_to(guild=TEST_GUILD)
             await self.tree.sync(guild=TEST_GUILD)
-        elif ENV is "prod":
+        elif ENV == "prod":
             self.tree.copy_global_to(guild=PRIMARY_GUILD)
             await self.tree.sync(guild=PRIMARY_GUILD)
 
