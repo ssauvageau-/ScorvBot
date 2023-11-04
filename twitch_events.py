@@ -18,6 +18,7 @@ class TwitchCog(commands.Cog):
         self.bot = bot
         self.guild_prime = os.getenv("PRIMARY_GUILD")
         self.guild_test = os.getenv("TEST_GUILD")
+        self.env = os.getenv("ENV")
         self.twitch_client_id = os.getenv("TWITCH_CLIENT_ID")
         self.twitch_secret = os.getenv("TWITCH_SECRET")
         self.twitch = Twitch(self.twitch_client_id, self.twitch_secret)
@@ -113,7 +114,10 @@ class TwitchCog(commands.Cog):
         if len(stream_data["data"]) == 1:
             title = stream_data["data"][0]["title"]
             game = stream_data["data"][0]["game_name"]
-            guild = await self.bot.fetch_guild(self.guild_test)
+            if self.env is "prod":
+                guild = await self.bot.fetch_guild(self.guild_prime)
+            elif self.env is "dev":
+                guild = await self.bot.fetch_guild(self.guild_test)
             channels = await guild.fetch_channels()
             tmp_embed = discord.Embed(color=discord.Color.gold())
             tmp_embed.set_footer(text=game)

@@ -22,6 +22,7 @@ class TaskCog(commands.Cog):
         self.bot = bot
         self.guild_prime = os.getenv("PRIMARY_GUILD")
         self.guild_test = os.getenv("TEST_GUILD")
+        self.env = os.getenv("ENV")
         self.batch_update.start()
         self.runTest = ""
         if self.runTest:
@@ -57,7 +58,10 @@ class TaskCog(commands.Cog):
     @tasks.loop(time=times)
     async def batch_update(self):
         await self.bot.wait_until_ready()
-        guild = await self.bot.fetch_guild(self.guild_prime)
+        if self.env is "prod":
+            guild = await self.bot.fetch_guild(self.guild_prime)
+        elif self.env is "dev":
+            guild = await self.bot.fetch_guild(self.guild_test)
 
         """
         This will run and get all threads with 'complete' in the title or that are older than 14 days.
@@ -102,7 +106,11 @@ class TaskCog(commands.Cog):
     async def unban_temporary_bans(self):
         await self.bot.wait_until_ready()
 
-        guild = await self.bot.fetch_guild(self.guild_prime)
+        if self.env is "prod":
+            guild = await self.bot.fetch_guild(self.guild_prime)
+        elif self.env is "dev":
+            guild = await self.bot.fetch_guild(self.guild_test)
+
         channels = await guild.fetch_channels()
         log_channel = discord.utils.find(
             lambda c: c.name == self.log_channel_name, channels
