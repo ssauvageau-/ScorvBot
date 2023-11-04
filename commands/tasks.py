@@ -102,7 +102,7 @@ class TaskCog(commands.Cog):
     async def unban_temporary_bans(self):
         await self.bot.wait_until_ready()
 
-        guild = await self.bot.fetch_guild(self.guild_test)
+        guild = await self.bot.fetch_guild(self.guild_prime)
         channels = await guild.fetch_channels()
         log_channel = discord.utils.find(
             lambda c: c.name == self.log_channel_name, channels
