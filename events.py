@@ -9,26 +9,26 @@ class Events(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @commands.Cog.listener(name="on_message")
-    async def fish_event(self, message: discord.Message):
-        if message.author == self.bot.user:
-            return
-
-        if message.author.id in (
-            225337962521427968,
-            274230000935370763,
-        ):  # Zantai, mad_lee
-            if random.randint(1, 200) == 69:
-                await message.channel.send("<:lawyerfish:1156268220546826321>")
-        elif message.author.id in (
-            434082239706431508,  # Maska
-            136586501436735488,  # Ceno
-            297721856130154497,  # Mergo
-            # 587334964257751053,  # Avyctes
-            406040451850698752,  # Snazzymoistboi
-        ):
-            if random.randint(1, 500) == 69:
-                await message.channel.send("<:lawyerfish:1156268220546826321>")
+    # @commands.Cog.listener(name="on_message")
+    # async def fish_event(self, message: discord.Message):
+    #     if message.author == self.bot.user:
+    #         return
+    #
+    #     if message.author.id in (
+    #         225337962521427968,
+    #         274230000935370763,
+    #     ):  # Zantai, mad_lee
+    #         if random.randint(1, 200) == 69:
+    #             await message.channel.send("<:lawyerfish:1156268220546826321>")
+    #     elif message.author.id in (
+    #         434082239706431508,  # Maska
+    #         136586501436735488,  # Ceno
+    #         297721856130154497,  # Mergo
+    #         # 587334964257751053,  # Avyctes
+    #         406040451850698752,  # Snazzymoistboi
+    #     ):
+    #         if random.randint(1, 500) == 69:
+    #             await message.channel.send("<:lawyerfish:1156268220546826321>")
 
     @commands.Cog.listener(name="on_message")
     async def tomo_event(self, message: discord.Message):
