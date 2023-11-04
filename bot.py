@@ -23,6 +23,7 @@ TEST_GUILD = discord.Object(id=TEST_GUILD_ID)
 PRIMARY_GUILD_ID = os.getenv("PRIMARY_GUILD")
 PRIMARY_GUILD = discord.Object(id=PRIMARY_GUILD_ID)
 TOKEN = os.getenv("DISCORD_TOKEN")
+ENV = os.getenv("ENV")
 
 
 class ScorvBot(commands.Bot):
@@ -45,10 +46,12 @@ class ScorvBot(commands.Bot):
         self.tree.add_command(RaffleCommandGroup(self))
         self.tree.add_command(ModerationCommandGroup(self))
 
-        self.tree.copy_global_to(guild=TEST_GUILD)
-        await self.tree.sync(guild=TEST_GUILD)
-        # self.tree.copy_global_to(guild=PRIMARY_GUILD)
-        # await self.tree.sync(guild=PRIMARY_GUILD)
+        if ENV is "dev":
+            self.tree.copy_global_to(guild=TEST_GUILD)
+            await self.tree.sync(guild=TEST_GUILD)
+        elif ENV is "prod":
+            self.tree.copy_global_to(guild=PRIMARY_GUILD)
+            await self.tree.sync(guild=PRIMARY_GUILD)
 
 
 bot_activity = discord.Activity(
