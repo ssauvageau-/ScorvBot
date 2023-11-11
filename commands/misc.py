@@ -15,7 +15,6 @@ class MiscCommandCog(commands.Cog):
         self.bot = bot
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
-        self.sunder_path = "images/SunderSquare.png"
         self.log_channel = "scorv-log"
         super().__init__()
 
