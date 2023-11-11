@@ -4,6 +4,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from utils import Sunder
+
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -126,3 +128,15 @@ class Events(commands.Cog):
         if think is not None:
             await message.channel.send(think)
             await message.delete()
+
+    @commands.Cog.listener(name="on_message")
+    async def sunder_event(self, message: discord.Message):
+        threshold = 80 if "sunder" in message.content else 99
+        if random.randint(1, 100) >= threshold:
+            sundered_role = discord.utils.find(
+                lambda role: role.name == "Sundered", message.guild.roles
+            )
+
+            async with Sunder(message.author) as sunder:
+                await message.channel.send(file=sunder[0], embed=sunder[1])
+                await message.author.add_roles(sundered_role, reason="Sundered")

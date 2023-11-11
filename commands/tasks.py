@@ -31,12 +31,14 @@ class TaskCog(commands.Cog):
         self.log_channel_name = "scorv-log"
         self.temp_bans_json_path = os.getenv("TEMP_BANS_JSON_PATH")
         self.unban_temporary_bans.start()
+        self.remove_sundered_role.start()
 
         super().__init__()
 
     def cog_unload(self):
         self.batch_update.cancel()
         self.unban_temporary_bans.cancel()
+        self.remove_sundered_role.cancel()
 
     @tasks.loop(seconds=1, count=1)
     async def test(self):
@@ -189,3 +191,27 @@ class TaskCog(commands.Cog):
                 )
 
                 await log_channel.send(embed=log_embed)
+
+    @tasks.loop(minutes=15)
+    async def remove_sundered_role(self):
+        await self.bot.wait_until_ready()
+        if self.env == "prod":
+            guild = discord.utils.find(
+                lambda guild: str(guild.id) == self.guild_prime, self.bot.guilds
+            )
+        elif self.env == "dev":
+            guild = discord.utils.find(
+                lambda guild: str(guild.id) == self.guild_test, self.bot.guilds
+            )
+
+        sundered_role = discord.utils.find(
+            lambda role: role.name == "Sundered", guild.roles
+        )
+
+        if sundered_role is None:
+            logging.error("Sundered role not found")
+            return
+
+        for member in sundered_role.members:
+            await member.remove_roles(sundered_role, reason="Remove Sundered role")
+            logging.info(f"Removed Sundered role from {member.display_name}")

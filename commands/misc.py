@@ -6,6 +6,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from utils import Sunder
+
 
 @app_commands.guild_only()
 class MiscCommandCog(commands.Cog):
@@ -13,6 +15,7 @@ class MiscCommandCog(commands.Cog):
         self.bot = bot
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
+        self.sunder_path = "images/SunderSquare.png"
         self.log_channel = "scorv-log"
         super().__init__()
 
@@ -170,3 +173,25 @@ class MiscCommandCog(commands.Cog):
         mask = iresize.convert("RGBA")
         mobile_discord.paste(iresize, (x1, y1, x2, y2), mask)
         return mobile_discord
+
+    @app_commands.command(
+        name="sunder",
+        description="Sunder a member which temporarly gives them a 'Sundered' role and posts a message in the channel.",
+    )
+    @app_commands.describe(member="The member to sunder")
+    @app_commands.checks.has_any_role("Admin", "Moderator", "Janitor")
+    async def sunder(
+        self, interaction: discord.Interaction, member: discord.Member
+    ) -> None:
+        await interaction.response.defer(ephemeral=True, thinking=True)
+
+        sundered_role = discord.utils.find(
+            lambda role: role.name == "Sundered", interaction.guild.roles
+        )
+
+        async with Sunder(member) as sunder:
+            await interaction.channel.send(file=sunder[0], embed=sunder[1])
+            await member.add_roles(sundered_role, reason="Sundered")
+            await interaction.followup.send(
+                f"Sundered {member.display_name}", ephemeral=True
+            )
