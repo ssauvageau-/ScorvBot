@@ -139,14 +139,14 @@ channel_gd_embed.add_field(
 channel_community_embed = discord.Embed(color=0x1E1F22)
 channel_community_embed.add_field(
     name="↓ Community ↓",
-    value="<#217995616163332096>"
-    "\nThis channel is for the sole purpose of creating text posts with informations regarding the people you are searching to play with."
-    "\n<#119761513148841984>"
-    "\nThis channel is for the sole purpose of organizing item trades on softcore characters."
-    "\nPlease use <LINK> if you are posting links."
-    "\n<#1058431796460654683>"
-    "\nThis channel is for the sole purpose of organizing item trades on hardcore characters."
-    "\nPlease use <LINK> if you are posting links.",
+    value="<#1152658400421875732>"
+    "\nThis forum channel is for trading with other players. See the channel's posting guidelines for more information."
+    "\n<#1152659580552224818>"
+    "\nThis forum channel is for finding players to group up with. See the channel's posting guidelines for more information."
+    "\n<#1153388417187590285>"
+    "\nThis forum channel is for showing off your character. See the channel's posting guidelines for more information."
+    "\n<#1153390164886958212>"
+    "\nThis forum channel is for showing off rare or noteworthy item drops. See the channel's posting guidelines for more information.",
     inline=False,
 )
 chat_roles_embed = discord.Embed(color=0x1E1F22)
