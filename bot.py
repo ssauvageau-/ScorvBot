@@ -5,7 +5,6 @@ from discord.ext import commands
 from discord.flags import Intents
 from dotenv import load_dotenv
 
-from commands.moderation import ModerationCommandCog
 from commands.announcements import AnnouncementCommandGroup
 from commands.assign_role import AssignRoleCommandGroup
 from commands.graph_roles import GraphRoleCommandGroup
@@ -13,7 +12,7 @@ from commands.tags import TagSystemGroup
 from commands.misc import MiscCommandCog
 from commands.raffle import RaffleCommandGroup
 from commands.tasks import TaskCog
-from commands.moderation_app_commands import ModerationCommandGroup
+from commands.moderation import ModerationCommandGroup
 from events import Events
 from twitch_events import TwitchCog
 
@@ -33,7 +32,6 @@ class ScorvBot(commands.Bot):
     async def setup_hook(self):
         # Add command cogs here
         await self.add_cog(Events(self))
-        await self.add_cog(ModerationCommandCog(self))
         await self.add_cog(MiscCommandCog(self))
         await self.add_cog(TaskCog(self))
         await self.add_cog(TwitchCog(self))
