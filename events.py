@@ -134,7 +134,13 @@ class Events(commands.Cog):
         if message.author.bot:
             return
 
-        threshold = 80 if "sunder" in message.content else 99.5
+        sundered = discord.utils.find(
+            lambda role: role.name == "Sundered", message.author.roles
+        )
+        if sundered is not None:
+            return
+
+        threshold = 95 if "sunder" in message.content else 99.9
         if random.random() * 100 >= threshold:
             sundered_role = discord.utils.find(
                 lambda role: role.name == "Sundered", message.guild.roles
