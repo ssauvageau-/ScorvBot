@@ -16,23 +16,19 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
     async def post_rules(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer(thinking=True, ephemeral=True)
         await channel.purge()
-        await channel.send(
-            "https://cdn.discordapp.com/attachments/428832869398347776/1151199255990640721/Grim_Dawn_Discord_Logo.png"
-        )
-        await channel.send(
-            "https://cdn.discordapp.com/attachments/647753999948185611/647754106492026902/2a8e119d-e266-40d3-a9c8-a92194b658472Fdivider2.png"
-        )
+        logo = discord.File("images/Grim_Dawn_Discord_Logo.png")
+        await channel.send(file=logo)
+        divider = discord.File("images/divider.png")
+        await channel.send(file=divider)
         await channel.send(embed=embeds.welcome_embed)
-        await channel.send(
-            "https://cdn.discordapp.com/attachments/647753999948185611/647754112661848094/2a8e119d-e266-40d3-a9c8-a92194b658472Fatt.png"
-        )
+        attitude = discord.File("images/attitude.png")
+        await channel.send(file=attitude)
         await channel.send(embed=embeds.global_embed)
         await channel.send(embed=embeds.global_embed2)
-        await channel.send(
-            "https://cdn.discordapp.com/attachments/647753999948185611/647754128541614090/2a8e119d-e266-40d3-a9c8-a92194b658472Fchannel_rules.png"
-        )
+        channel_rules = discord.File("images/channelRules.png")
+        await channel.send(file=channel_rules)
         await channel.send(
             embeds=[
                 embeds.channel_news_embed,
@@ -41,11 +37,12 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
                 embeds.channel_offtopic_embed,
             ]
         )
-        await channel.send(
-            "https://cdn.discordapp.com/attachments/647753999948185611/647754159034204160/2a8e119d-e266-40d3-a9c8-a92194b658472Fchat_roles.png"
-        )
+        chat_roles = discord.File("images/chatRoles.png")
+        await channel.send(file=chat_roles)
         await channel.send(embed=embeds.chat_roles_embed)
-        await interaction.followup.send(f"Posted rules in {channel.mention}")
+        await interaction.followup.send(
+            f"Posted rules in {channel.mention}", ephemeral=True
+        )
 
     @app_commands.command(name="post-links", description="Post the generated links")
     @app_commands.describe(channel="The channel in which to post the links")
@@ -53,11 +50,10 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
     async def post_links(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer(thinking=True, ephemeral=True)
         await channel.purge()
-        await channel.send(
-            "https://cdn.discordapp.com/attachments/647753999948185611/647754188469567488/2a8e119d-e266-40d3-a9c8-a92194b658472Fbuy_now.png"
-        )
+        buy_now = discord.File("images/buynow.png")
+        await channel.send(file=buy_now)
         await channel.send(
             embeds=[
                 embeds.buy_gd_embed,
@@ -66,11 +62,12 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
                 embeds.buy_foa_embed,
             ]
         )
-        await channel.send(
-            "https://cdn.discordapp.com/attachments/647753999948185611/647754218198925312/2a8e119d-e266-40d3-a9c8-a92194b658472Flinkbase.png"
-        )
+        links = discord.File("images/linkbase.png")
+        await channel.send(file=links)
         await channel.send(embed=embeds.links_embed)
-        await interaction.followup.send(f"Posted links in {channel.mention}")
+        await interaction.followup.send(
+            f"Posted links in {channel.mention}", ephemeral=True
+        )
 
     @post_rules.error
     @post_links.error
