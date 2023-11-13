@@ -132,7 +132,7 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
     )
     @app_commands.describe(member="The member to temporarily ban")
     @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
-    async def temporary_ban_member_modal(
+    async def temporary_ban_member(
         self, interaction: discord.Interaction, member: discord.Member
     ):
         await interaction.response.send_modal(
@@ -165,3 +165,16 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
                 await message.delete()
 
         await interaction.followup.send(f"Deleted {number} messages", ephemeral=True)
+
+    @temporary_ban_member.error
+    @clear.error
+    async def missing_role_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
+        if isinstance(error, app_commands.errors.MissingAnyRole):
+            await interaction.response.send_message(
+                "You do not have the required permissions to use this command!",
+                ephemeral=True,
+            )
+        else:
+            raise error
