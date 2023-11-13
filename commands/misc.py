@@ -49,9 +49,17 @@ class MiscCommandCog(commands.Cog):
                 "Sending your message below:", ephemeral=True
             )
             post_message = await interaction.channel.send(message)
-            await log.send(
-                f"{interaction.user} sent a post as Scorv: {message} -> {post_message.jump_url}"
+            log_embed = discord.Embed(
+                title="Posted as Scorv",
+                description=message,
+                timestamp=post_message.created_at,
             )
+            log_embed.set_author(
+                name=interaction.user.display_name,
+                icon_url=interaction.user.display_avatar.url,
+            )
+            log_embed.add_field(name="Link", value=post_message.jump_url)
+            await log.send(embed=log_embed)
             return
         # else - log channel not found
         await interaction.response.send_message(
