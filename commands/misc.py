@@ -58,7 +58,7 @@ class MiscCommandCog(commands.Cog):
                 name=interaction.user.display_name,
                 icon_url=interaction.user.display_avatar.url,
             )
-            log_embed.add_field(name="Link", value=post_message.jump_url)
+            log_embed.add_field(name="", value=post_message.jump_url)
             await log.send(embed=log_embed)
             return
         # else - log channel not found
