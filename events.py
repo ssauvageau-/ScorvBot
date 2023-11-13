@@ -1,4 +1,5 @@
 import random
+import re
 
 import discord
 from discord import app_commands
@@ -9,6 +10,7 @@ from utils import Sunder
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
+        self.log_channel_name = "scorv-log"
         self.bot = bot
 
     # @commands.Cog.listener(name="on_message")
@@ -149,3 +151,35 @@ class Events(commands.Cog):
             async with Sunder(message.author) as sunder:
                 await message.channel.send(file=sunder[0], embed=sunder[1])
                 await message.author.add_roles(sundered_role, reason="Sundered")
+
+    @commands.Cog.listener(name="on_message")
+    async def masked_url_event(self, message: discord.Message):
+        if message.author.bot:
+            return
+
+        log_channel = discord.utils.find(
+            lambda channel: channel.name == self.log_channel_name,
+            message.guild.channels,
+        )
+        if log_channel is None:
+            raise Exception("Log channel not found")
+
+        masked_url_pattern = r"\[(?P<mask>.+)\]\((?P<url>.*)\)"
+        for masked_url in re.finditer(masked_url_pattern, message.content):
+            mask = masked_url.group("mask")
+            url = masked_url.group("url")
+
+            log_embed = discord.Embed(
+                color=discord.Color.yellow(),
+                title="Masked URL in message",
+                timestamp=message.created_at,
+            )
+            log_embed.set_author(
+                name=message.author.display_name,
+                icon_url=message.author.display_avatar.url,
+            )
+            log_embed.add_field(name="Message", value=message.jump_url, inline=True)
+            log_embed.add_field(name="Mask", value=f"`{mask}`", inline=True)
+            log_embed.add_field(name="URL", value=f"`{url}`", inline=True)
+
+            await log_channel.send(embed=log_embed)
