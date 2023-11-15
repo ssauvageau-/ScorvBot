@@ -142,8 +142,10 @@ class Events(commands.Cog):
         if sundered is not None:
             return
 
-        threshold = 95 if "sunder" in message.content else 99.9
-        if random.random() * 100 >= threshold:
+        threshold = 0.98 if "sunder" in message.content else 1
+        # too lazy to remove this if statement; random.random() cannot roll 1.0 so this disables any message being able to sunder
+
+        if random.random() >= threshold:
             sundered_role = discord.utils.find(
                 lambda role: role.name == "Sundered", message.guild.roles
             )
