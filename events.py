@@ -1,3 +1,4 @@
+import logging
 import random
 import re
 
@@ -5,13 +6,26 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import Sunder
+from utils import Sunder, log_utils
 
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
+        self.logger = logging.getLogger("bot")
         self.log_channel_name = "scorv-log"
         self.bot = bot
+
+    @commands.Cog.listener(name="on_error")
+    async def log_error(self, event: str, *args, **kwargs):
+        self.logger.error(event)
+
+    @commands.Cog.listener(name="on_app_command_completion")
+    async def log_app_command_completion(
+        self, interaction: discord.Interaction, command: app_commands.Command
+    ):
+        self.logger.info(
+            f"User {log_utils.format_user(interaction.user)} used command {log_utils.format_app_command_name(command)} in {log_utils.format_channel_name(interaction.channel)}"
+        )
 
     # @commands.Cog.listener(name="on_message")
     # async def fish_event(self, message: discord.Message):

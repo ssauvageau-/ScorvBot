@@ -10,3 +10,4 @@ venv/
 __pycache__/
 json/
 .envrc
+logs/

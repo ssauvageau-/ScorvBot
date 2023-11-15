@@ -5,6 +5,7 @@ from discord.ext import commands
 from discord.flags import Intents
 from dotenv import load_dotenv
 
+from logging_config import setup_logging
 from commands.announcements import AnnouncementCommandGroup
 from commands.assign_role import AssignRoleCommandGroup
 from commands.graph_roles import GraphRoleCommandGroup
@@ -52,8 +53,12 @@ class ScorvBot(commands.Bot):
             await self.tree.sync(guild=PRIMARY_GUILD)
 
 
+logging_handler = setup_logging()
+
 bot_activity = discord.Activity(
     type=discord.ActivityType.watching, name="for fresh meat!"
 )
 bot = ScorvBot(intents=discord.Intents.all(), activity=bot_activity)
-bot.run(TOKEN)
+
+# Run bot. Suppress default logging config since we used our own
+bot.run(TOKEN, log_handler=None)

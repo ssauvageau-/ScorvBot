@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import json
+import logging
 import os
 from typing import Dict
 
@@ -8,7 +9,7 @@ from discord import app_commands, TextStyle
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from utils import load_json_db, dump_json_db
+from utils import load_json_db, dump_json_db, log_utils
 
 COMMAND_ROLE_ALLOW_LIST = ["Admin", "Moderator", "Janitor"]
 
@@ -112,6 +113,7 @@ class TemporaryBanModal(discord.ui.Modal):
 class ModerationCommandGroup(app_commands.Group, name="moderation"):
     def __init__(self, bot: commands.Bot):
         load_dotenv()
+        self.logger = logging.getLogger("bot")
         self.temp_bans_json_path = os.getenv("TEMP_BANS_JSON_PATH")
         try:
             self.temp_bans_dict = load_json_db(self.temp_bans_json_path)
@@ -175,6 +177,9 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             await interaction.response.send_message(
                 "You do not have the required permissions to use this command!",
                 ephemeral=True,
+            )
+            self.logger.info(
+                f"User {log_utils.format_user(interaction.user)} attempted to use command {log_utils.format_app_command_name(interaction.command)} without proper permissions"
             )
         else:
             raise error
