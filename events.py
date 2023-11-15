@@ -35,6 +35,25 @@ class Events(commands.Cog):
     #             await message.channel.send("<:lawyerfish:1156268220546826321>")
 
     @commands.Cog.listener(name="on_message")
+    async def peach_event(self, message: discord.Message):
+        if message.author == self.bot.user:
+            return
+
+        if message.author.id in (
+            142134189800685568,  # Eard
+            406040451850698752,  # Snazzymoistboi
+        ):
+            if "butt" in message.content.lower():
+                await message.add_reaction(
+                    random.choice(
+                        "🍑",
+                        "<:ass:649476166750568478>",
+                        "<:assL:649819612417884182>",
+                        "<:buttdevotions:792203000008933426>",
+                    )
+                )
+
+    @commands.Cog.listener(name="on_message")
     async def tomo_event(self, message: discord.Message):
         if message.author == self.bot.user:
             return
