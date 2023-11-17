@@ -60,10 +60,12 @@ class Events(commands.Cog):
             if "butt" in message.content.lower():
                 await message.add_reaction(
                     random.choice(
-                        "🍑",
-                        "<:ass:649476166750568478>",
-                        "<:assL:649819612417884182>",
-                        "<:buttdevotions:792203000008933426>",
+                        [
+                            "🍑",
+                            "<:ass:649476166750568478>",
+                            "<:assL:649819612417884182>",
+                            "<:buttdevotions:792203000008933426>",
+                        ]
                     )
                 )
 
