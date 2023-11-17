@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import Sunder
+from utils import log_utils, Sunder
 
 
 @app_commands.guild_only()
@@ -201,3 +201,18 @@ class MiscCommandCog(commands.Cog):
             await interaction.followup.send(
                 f"Sundered {member.display_name}", ephemeral=True
             )
+
+    @sunder.error
+    async def missing_role_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
+        if isinstance(error, app_commands.errors.MissingAnyRole):
+            await interaction.response.send_message(
+                "You do not have the required permissions to use this command!",
+                ephemeral=True,
+            )
+            self.logger.info(
+                f"User {log_utils.format_user(interaction.user)} attempted to use command {log_utils.format_app_command_name(interaction.command)} without proper permissions"
+            )
+        else:
+            raise error
