@@ -68,6 +68,7 @@ class Events(commands.Cog):
                         ]
                     )
                 )
+                self.logger.info(f"butt event triggered on message {message.jump_url}")
 
     @commands.Cog.listener(name="on_message")
     async def tomo_event(self, message: discord.Message):
@@ -78,6 +79,7 @@ class Events(commands.Cog):
                 stickers = message.guild.stickers
                 tomo = [sticker for sticker in stickers if sticker.name == "tomodak"]
                 await message.channel.send(stickers=tomo)
+                self.logger.info(f"Tomo event triggered on message {message.jump_url}")
 
     @commands.Cog.listener(name="on_message")
     async def nerd_event(self, message: discord.Message):
@@ -87,6 +89,7 @@ class Events(commands.Cog):
         if message.content.lower() == "nerd":
             await message.channel.send(message.content)
             await message.delete()
+            self.logger.info(f"nerd event triggered on message {message.jump_url}")
 
     @commands.Cog.listener(name="on_message")
     async def crab_event(self, message: discord.Message):
@@ -104,6 +107,7 @@ class Events(commands.Cog):
                     ]
                 )
             )
+            self.logger.info(f"crab event triggered on message {message.jump_url}")
 
     @commands.Cog.listener(name="on_message")
     async def xpac_event(self, message: discord.Message):
@@ -114,6 +118,7 @@ class Events(commands.Cog):
             await message.reply(
                 content="https://cdn.discordapp.com/attachments/1151691325549322262/1153779612053159946/image.png"
             )
+            self.logger.info(f"xpac event triggered on message {message.jump_url}")
 
     @commands.Cog.listener(name="on_message")
     async def thinkematic_event(self, message: discord.Message):
@@ -163,8 +168,11 @@ class Events(commands.Cog):
         pruned = message.content.replace(" ", "")
         think = thinkematics_tm.get(pruned)
         if think is not None:
-            await message.channel.send(think)
+            think_message = await message.channel.send(think)
             await message.delete()
+            self.logger.info(
+                f"Thinkematics {think} triggered by {message.author.display_name} {think_message.jump_url}"
+            )
 
     @commands.Cog.listener(name="on_message")
     async def sunder_event(self, message: discord.Message):
@@ -186,8 +194,13 @@ class Events(commands.Cog):
             )
 
             async with Sunder(message.author) as sunder:
-                await message.channel.send(file=sunder[0], embed=sunder[1])
+                sunder_message = await message.channel.send(
+                    file=sunder[0], embed=sunder[1]
+                )
                 await message.author.add_roles(sundered_role, reason="Sundered")
+                self.logger.info(
+                    f"Sundered {message.author.display_name} {sunder_message.jump_url}"
+                )
 
     @commands.Cog.listener(name="on_message")
     async def masked_url_event(self, message: discord.Message):
@@ -220,3 +233,6 @@ class Events(commands.Cog):
             log_embed.add_field(name="URL", value=f"`{url}`", inline=True)
 
             await log_channel.send(embed=log_embed)
+            self.logger.info(
+                f"Masked URL [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)} {message.jump_url}"
+            )
