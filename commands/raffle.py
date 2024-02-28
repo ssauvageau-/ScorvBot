@@ -151,26 +151,35 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
 
     @app_commands.command(name="pull", description="Pull a winner from the raffle!")
     @app_commands.checks.has_any_role("Admin", "Moderator")
-    async def pull_raffle(self, interaction: discord.Interaction):
+    async def pull_raffle(self, interaction: discord.Interaction, count: str = "1"):
+        responses = [
+            "You have won a FABULOUS prize!\n",
+            "You have been arbitrarily selected to receive stuff and things!\n",
+            "You're a winner! But not of Scorv's stew, sorry. Enjoy the spoils of the raffle, though!\n",
+            "You open your Discord and find...hot new loot!",
+        ]
         """
         So, if we don't want people to be able to win multiple times, we will set their win-tracker to True if they've won.
         This will keep the while loop going on subsequent pulls.
         If we don't care, we'll never set their win-tracker to True, and therefore the if statement in the while loop will never trigger.
         """
-        lucky = False
-        while not lucky:
-            lucky = random.choice(list(self.raffle_dict.keys()))
-            if lucky == self.raffle_config:
-                lucky = ""
-                continue
-            if self.raffle_dict[lucky]["hasWon"]:
-                lucky = False
-        await interaction.response.send_message(
-            f"<@{self.raffle_dict[lucky]['id']}>, congratulations! You have won a FABULOUS prize! A moderator will contact you shortly with information about your reward."
-        )
-        if not self.raffle_dict[self.raffle_config]["multiple"]:
-            self.raffle_dict[lucky]["hasWon"] = True
-            self.dump_raffle()
+        winners = []
+        for winner in range(int(count)):
+            lucky = False
+            while not lucky:
+                lucky = random.choice(list(self.raffle_dict.keys()))
+                if lucky == self.raffle_config:
+                    lucky = ""
+                    continue
+                if self.raffle_dict[lucky]["hasWon"]:
+                    lucky = False
+            if not self.raffle_dict[self.raffle_config]["multiple"]:
+                self.raffle_dict[lucky]["hasWon"] = True
+                self.dump_raffle()
+            winners.append(
+                f"<@{self.raffle_dict[lucky]['id']}>, congratulations! {random.choice(responses)} A moderator will contact you shortly with information about your reward."
+            )
+        await interaction.response.send_message("\n".join(winners))
         return
 
     @app_commands.command(name="meme", description="Haha funny")
