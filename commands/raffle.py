@@ -54,6 +54,22 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
         )
 
     @app_commands.command(
+        name="remove",
+        description="Remove a user from the current raffle based on their discord userid.",
+    )
+    async def raffle_remove(self, interaction: discord.Interaction, id: str):
+        for member in self.raffle_dict:
+            if member == self.raffle_config:
+                continue
+            if self.raffle_dict[member]["id"] == int(id):
+                del self.raffle_dict[member]
+                await interaction.response.send_message(
+                    f"Removed {member} from the raffle!"
+                )
+                return
+        await interaction.response.send_message("Userid not found in raffle.")
+
+    @app_commands.command(
         name="join", description="Join an upcoming raffle for fabulous prizes!"
     )
     async def join_raffle(self, interaction: discord.Interaction):
