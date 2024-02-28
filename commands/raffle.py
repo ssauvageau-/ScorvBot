@@ -45,6 +45,15 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
         return base64.b64decode(data.encode("utf-8")).decode("utf-8")
 
     @app_commands.command(
+        name="count", description="Replies with the number of people in the raffle."
+    )
+    async def raffle_count(self, interaction: discord.Interaction):
+        await interaction.response.send_message(
+            f"There are {len(self.raffle_dict) - 1} users in the raffle!\n"
+            f"This corresponds to having a {100.0/(len(self.raffle_dict) - 1)}% chance to win any prize!"
+        )
+
+    @app_commands.command(
         name="join", description="Join an upcoming raffle for fabulous prizes!"
     )
     async def join_raffle(self, interaction: discord.Interaction):
@@ -118,7 +127,6 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
         self.raffle_dict = {}
         self.dump_raffle()
         await interaction.response.send_message("Raffle closed successfully.")
-        await interaction.message.delete()
 
     @app_commands.command(name="pull", description="Pull a winner from the raffle!")
     @app_commands.checks.has_any_role("Admin", "Moderator")
