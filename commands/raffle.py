@@ -48,6 +48,11 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
         name="count", description="Replies with the number of people in the raffle."
     )
     async def raffle_count(self, interaction: discord.Interaction):
+        if not self.raffle_dict:
+            await interaction.response.send_message(
+                "There is no currently-active raffle.", ephemeral=True
+            )
+            return
         await interaction.response.send_message(
             f"There are {len(self.raffle_dict) - 1} users in the raffle!\n"
             f"This corresponds to having a {100.0/(len(self.raffle_dict) - 1)}% chance to win any prize!"
