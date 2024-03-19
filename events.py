@@ -237,3 +237,46 @@ class Events(commands.Cog):
             self.logger.info(
                 f"Masked URL [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)} {message.jump_url}"
             )
+
+    @commands.Cog.listener(name="on_message")
+    async def discord_link_event(self, message: discord.Message):
+        if message.author.bot:
+            return
+
+        roles = []
+        for role in message.author.roles:
+            roles.append(role.name)
+
+        if "Admin" in roles or "Moderator" in roles:
+            return
+
+        log_channel = discord.utils.find(
+            lambda channel: channel.name == self.log_channel_name,
+            message.guild.channels,
+        )
+        if log_channel is None:
+            raise Exception("Log channel not found")
+
+        if "https://discord.gg/" in message.content.lower():
+            log_embed = discord.Embed(
+                color=discord.Color.red(),
+                title="Discord Link Posted",
+                timestamp=message.created_at,
+            )
+            log_embed.set_author(
+                name=message.author.display_name,
+                icon_url=message.author.display_avatar.url,
+            )
+            log_embed.add_field(
+                name="Channel", value=message.channel.jump_url, inline=True
+            )
+            log_embed.add_field(name="Message", value=message.content, inline=True)
+
+            await log_channel.send(embed=log_embed)
+            self.logger.info(
+                f"Discord link posted in {log_utils.format_channel_name(message.channel)} by {log_utils.format_user(message.author)}"
+            )
+            await message.reply(
+                content=f"{message.author.display_name} - please do not share Discord links in this server! Thank you! :)"
+            )
+            await message.delete()
