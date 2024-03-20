@@ -5,8 +5,11 @@ import re
 import discord
 from discord import app_commands
 from discord.ext import commands
+from datetime import datetime, timezone
 
 from utils import Sunder, log_utils
+
+utc = timezone.utc
 
 
 class Events(commands.Cog):
@@ -14,6 +17,7 @@ class Events(commands.Cog):
         self.logger = logging.getLogger("bot")
         self.log_channel_name = "scorv-log"
         self.bot = bot
+        self.timeline = {}
 
     @commands.Cog.listener(name="on_error")
     async def log_error(self, event: str, *args, **kwargs):
@@ -280,3 +284,77 @@ class Events(commands.Cog):
                 content=f"{message.author.display_name} - please do not share Discord links in this server! Thank you! :)"
             )
             await message.delete()
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(
+        self,
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState,
+    ):
+        if (
+            before.channel is None and after.channel is not None
+        ):  # user was not in voice but is now
+            self.timeline[member] = {
+                "last_channel": after.channel,
+                "connected": datetime.now(tz=utc),
+                "disconnected": None,
+                "hops": [],
+            }
+            print(self.timeline[member])
+        elif (
+            before.channel is not None and after.channel is not None
+        ):  # user hopped from one channel to another
+            self.timeline[member].update(
+                {
+                    "last_channel": after.channel,
+                }
+            )
+            self.timeline[member]["hops"].append(
+                {
+                    "channel": before.channel,
+                    "disconnected": datetime.now(tz=utc),
+                }
+            )
+            print(self.timeline[member])
+        elif (
+            before.channel is not None and after.channel is None
+        ):  # user has disconnected from voice
+            self.timeline[member].update({"disconnected": datetime.now(tz=utc)})
+
+            log_channel = discord.utils.find(
+                lambda channel: channel.name == self.log_channel_name,
+                before.channel.guild.channels,
+            )
+            if log_channel is None:
+                raise Exception("Log channel not found")
+
+            log_embed = discord.Embed(
+                color=discord.Color.green(),
+                title="User Disconnected from Voice",
+                timestamp=self.timeline[member]["disconnected"],
+            )
+            log_embed.set_author(
+                name=member.display_name,
+                icon_url=member.display_avatar.url,
+            )
+            log_embed.add_field(
+                name="Last Channel Visited",
+                value=self.timeline[member]["last_channel"].name,
+                inline=False,
+            )
+            log_embed.add_field(
+                name="Time Spent in Voice",
+                value=self.timeline[member]["disconnected"]
+                - self.timeline[member]["connected"],
+                inline=False,
+            )
+            old_time = self.timeline[member]["connected"]
+            for hop in self.timeline[member]["hops"]:
+                prev = hop["channel"]
+                time = hop["disconnected"] - old_time
+                log_embed.add_field(
+                    name="Previously In", value=f"{prev} for {time}", inline=False
+                )
+                old_time = hop["disconnected"]
+            await log_channel.send(embed=log_embed)
