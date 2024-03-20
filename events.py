@@ -292,6 +292,20 @@ class Events(commands.Cog):
         before: discord.VoiceState,
         after: discord.VoiceState,
     ):
+        log_channel = None
+        if before.channel is not None:
+            log_channel = discord.utils.find(
+                lambda channel: channel.name == self.log_channel_name,
+                before.channel.guild.channels,
+            )
+        elif after.channel is not None:
+            log_channel = discord.utils.find(
+                lambda channel: channel.name == self.log_channel_name,
+                after.channel.guild.channels,
+            )
+        if log_channel is None:
+            raise Exception("Log channel not found")
+
         if (
             before.channel is None and after.channel is not None
         ):  # user was not in voice but is now
@@ -301,7 +315,14 @@ class Events(commands.Cog):
                 "disconnected": None,
                 "hops": [],
             }
-            print(self.timeline[member])
+            await log_channel.send(
+                content=f"<t:{int(datetime.now(tz=utc).timestamp())}:R>\t{member.mention} joined {after.channel.name}."
+            )
+            self.logger.info(
+                f"{log_utils.format_user(member)} joined {after.channel.name}"
+            )
+            # a member is a user; log_utils wants a discord.User here, so warning given by IDE. Make a format_member
+            # func that is identical in function to format_user?
         elif (
             before.channel is not None and after.channel is not None
         ):  # user hopped from one channel to another
@@ -310,33 +331,29 @@ class Events(commands.Cog):
                     "last_channel": after.channel,
                 }
             )
+            now = datetime.now(tz=utc)
             self.timeline[member]["hops"].append(
                 {
                     "channel": before.channel,
-                    "disconnected": datetime.now(tz=utc),
+                    "disconnected": now,
                 }
             )
-            print(self.timeline[member])
+            self.logger.info(
+                f"{log_utils.format_user(member)} joined {after.channel.name} from {before.channel.name}."
+            )
         elif (
             before.channel is not None and after.channel is None
         ):  # user has disconnected from voice
             self.timeline[member].update({"disconnected": datetime.now(tz=utc)})
 
-            log_channel = discord.utils.find(
-                lambda channel: channel.name == self.log_channel_name,
-                before.channel.guild.channels,
-            )
-            if log_channel is None:
-                raise Exception("Log channel not found")
-
             hist = self.timeline.pop(
                 member, None
             )  # pop to remove entry from dict, but use it below
-
+            now = hist["disconnected"]
             log_embed = discord.Embed(
                 color=discord.Color.green(),
                 title="User Disconnected from Voice",
-                timestamp=hist["disconnected"],
+                timestamp=now,
             )
             log_embed.set_author(
                 name=member.display_name,
@@ -360,4 +377,12 @@ class Events(commands.Cog):
                     name="Previously In", value=f"{prev} for {time}", inline=False
                 )
                 old_time = hop["disconnected"]
-            await log_channel.send(embed=log_embed)
+            # await log_channel.send(embed=log_embed)
+
+            diff = now - hist["connected"]
+            await log_channel.send(
+                content=f"<t:{int(datetime.now(tz=utc).timestamp())}:R>\t{member.mention} disconnected from {before.channel.name} after {diff} in total."
+            )
+            self.logger.info(
+                f"{log_utils.format_user(member)} disconnected from {before.channel.name} after {diff} in total."
+            )
