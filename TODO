@@ -1,6 +1,6 @@
 - Add discord link pruning (In Dev)
     - Do we want to timeout users that post discord links?
     - Do we want a whitelist of shareable discord links?
-- Add voice call monitoring
-    - Connection/Disconnection tracking
+- Add voice call monitoring (In Dev)
+    - Connection/Disconnection tracking (Done)
     - (Long term) VTT to discern blacklisted terms

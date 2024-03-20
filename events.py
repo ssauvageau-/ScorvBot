@@ -329,10 +329,14 @@ class Events(commands.Cog):
             if log_channel is None:
                 raise Exception("Log channel not found")
 
+            hist = self.timeline.pop(
+                member, None
+            )  # pop to remove entry from dict, but use it below
+
             log_embed = discord.Embed(
                 color=discord.Color.green(),
                 title="User Disconnected from Voice",
-                timestamp=self.timeline[member]["disconnected"],
+                timestamp=hist["disconnected"],
             )
             log_embed.set_author(
                 name=member.display_name,
@@ -340,17 +344,16 @@ class Events(commands.Cog):
             )
             log_embed.add_field(
                 name="Last Channel Visited",
-                value=self.timeline[member]["last_channel"].name,
+                value=hist["last_channel"].name,
                 inline=False,
             )
             log_embed.add_field(
                 name="Time Spent in Voice",
-                value=self.timeline[member]["disconnected"]
-                - self.timeline[member]["connected"],
+                value=hist["disconnected"] - hist["connected"],
                 inline=False,
             )
-            old_time = self.timeline[member]["connected"]
-            for hop in self.timeline[member]["hops"]:
+            old_time = hist["connected"]
+            for hop in hist["hops"]:
                 prev = hop["channel"]
                 time = hop["disconnected"] - old_time
                 log_embed.add_field(
