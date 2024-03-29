@@ -16,6 +16,7 @@ class Events(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.logger = logging.getLogger("bot")
         self.log_channel_name = "scorv-log"
+        self.log_channel_name_alt = "scorv-log2"
         self.bot = bot
         self.timeline = {}
 
@@ -295,12 +296,12 @@ class Events(commands.Cog):
         log_channel = None
         if before.channel is not None:
             log_channel = discord.utils.find(
-                lambda channel: channel.name == self.log_channel_name,
+                lambda channel: channel.name == self.log_channel_name_alt,
                 before.channel.guild.channels,
             )
         elif after.channel is not None:
             log_channel = discord.utils.find(
-                lambda channel: channel.name == self.log_channel_name,
+                lambda channel: channel.name == self.log_channel_name_alt,
                 after.channel.guild.channels,
             )
         if log_channel is None:
