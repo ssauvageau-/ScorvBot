@@ -1,11 +1,12 @@
+import aiohttp
 from datetime import datetime, timedelta, timezone
 import json
 import logging
 import os
-from typing import Dict
+from typing import Dict, Optional
 
 import discord
-from discord import app_commands, TextStyle
+from discord import app_commands, http, TextStyle
 from discord.ext import commands
 from dotenv import load_dotenv
 import requests
@@ -109,6 +110,7 @@ class TemporaryBanModal(discord.ui.Modal):
             ephemeral=True,
         )
 
+SPY_BOTS = "https://gist.githubusercontent.com/Dziurwa14/05db50c66e4dcc67d129838e1b9d739a/raw/b0c0ebba557521e9234074a22e544ab48f448f6a/spy.pet%20accounts"
 
 @app_commands.guild_only()
 class ModerationCommandGroup(app_commands.Group, name="moderation"):
@@ -127,27 +129,31 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             os.close(os.open(self.temp_bans_json_path, os.O_CREAT))
         self.log_channel_name = "scorv-log"
         self.bot = bot
-        self.token = os.getenv("DISCORD_TOKEN")
+        self.spy_bots = requests.get(SPY_BOTS).json()
+        self._session = None # filled in `reload_spy_bots` function so we don't get DeprecationWarning
         super().__init__()
+
+    @commands.command(name="reload-spy-bots")
+    @commands.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
+    async def reload_spy_bots(self, ctx: commands.Context):
+        if self._session is None:
+            self._session = aiohttp.ClientSession()
+        response = await self._session.get(SPY_BOTS)
+        self.spy_bots = await response.json()
+        await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
     @app_commands.command(
         name="spy-ban",
         description="Ban spy.pet accounts identified by @PirateSoftware.",
     )
+    @app_commands.describe(reason="The reason to show to audit logs.")
     @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
-    async def ban_spy_pet(self, interaction: discord.Interaction):
+    async def ban_spy_pet(self, interaction: discord.Interaction, reason: Optional[str]):
         await interaction.response.defer(ephemeral=True, thinking=True)
         guild_id = interaction.guild_id
-        spybots = requests.get(
-            "https://gist.githubusercontent.com/Dziurwa14/05db50c66e4dcc67d129838e1b9d739a/raw/b0c0ebba557521e9234074a22e544ab48f448f6a/spy.pet%20accounts"
-        ).json()
-        requests.post(
-            f"https://discord.com/api/v10/guilds/{guild_id}/bulk-ban",
-            headers={
-                "Authorization": "Bot " + self.token,
-                "X-Audit-Log-Reason": "spy.pet bot",
-            },
-            json={"user_ids": spybots},
+        await self.bot.http.request(
+            http.Route("POST", "/guilds/{guild_id}/bulk-ban", guild_id=guild_id),
+            json={"user_ids": self.spy_bots},
         )
         await interaction.followup.send("Banned spy.pet accounts.")
 
@@ -186,8 +192,7 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             deletions = [number]
 
         for deletion in deletions:
-            async for message in interaction.channel.history(limit=deletion):
-                await message.delete()
+            await interaction.channel.purge(limit=deletion)
 
         await interaction.followup.send(f"Deleted {number} messages", ephemeral=True)
 
