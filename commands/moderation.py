@@ -146,14 +146,14 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
         name="spy-ban",
         description="Ban spy.pet accounts identified by @PirateSoftware.",
     )
-    @app_commands.describe(reason="The reason to show to audit logs.")
     @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
-    async def ban_spy_pet(self, interaction: discord.Interaction, reason: Optional[str]):
+    async def ban_spy_pet(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True, thinking=True)
         guild_id = interaction.guild_id
         await self.bot.http.request(
             http.Route("POST", "/guilds/{guild_id}/bulk-ban", guild_id=guild_id),
             json={"user_ids": self.spy_bots},
+            reason="spy.pet bot",
         )
         await interaction.followup.send("Banned spy.pet accounts.")
 
