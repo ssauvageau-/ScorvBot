@@ -8,6 +8,7 @@ import discord
 from discord import app_commands, TextStyle
 from discord.ext import commands
 from dotenv import load_dotenv
+import requests
 
 from utils import load_json_db, dump_json_db, log_utils
 
@@ -126,7 +127,29 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             os.close(os.open(self.temp_bans_json_path, os.O_CREAT))
         self.log_channel_name = "scorv-log"
         self.bot = bot
+        self.token = os.getenv("DISCORD_TOKEN")
         super().__init__()
+
+    @app_commands.command(
+        name="spy-ban",
+        description="Ban spy.pet accounts identified by @PirateSoftware.",
+    )
+    @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
+    async def ban_spy_pet(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        guild_id = interaction.guild_id
+        spybots = requests.get(
+            "https://gist.githubusercontent.com/Dziurwa14/05db50c66e4dcc67d129838e1b9d739a/raw/b0c0ebba557521e9234074a22e544ab48f448f6a/spy.pet%20accounts"
+        ).json()
+        requests.post(
+            f"https://discord.com/api/v10/guilds/{guild_id}/bulk-ban",
+            headers={
+                "Authorization": "Bot " + self.token,
+                "X-Audit-Log-Reason": "spy.pet bot",
+            },
+            json={"user_ids": spybots},
+        )
+        await interaction.followup.send("Banned spy.pet accounts.")
 
     @app_commands.command(
         name="temp-ban",
