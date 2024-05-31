@@ -262,7 +262,10 @@ class Events(commands.Cog, name="Events"):
         if log_channel is None:
             raise Exception("Log channel not found")
 
-        if "https://discord.gg/" in message.content.lower():
+        if (
+            "https://discord.gg/" in message.content.lower()
+            or "https://discord.com/" in message.content.lower()
+        ):
             log_embed = discord.Embed(
                 color=discord.Color.red(),
                 title="Discord Link Posted",
