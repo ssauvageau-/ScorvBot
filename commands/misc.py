@@ -10,7 +10,7 @@ from utils import log_utils, Sunder
 
 
 @app_commands.guild_only()
-class MiscCommandCog(commands.Cog):
+class MiscCommandCog(commands.Cog, name="Misc"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.mobile_path = "images/MobileDiscord.png"

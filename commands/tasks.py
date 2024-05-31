@@ -16,7 +16,7 @@ times = [time(hour=16, tzinfo=utc)]
 
 
 @app_commands.guild_only()
-class TaskCog(commands.Cog):
+class TaskCog(commands.Cog, name="Tasks"):
     def __init__(self, bot: commands.Bot):
         load_dotenv()
         self.bot = bot

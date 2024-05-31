@@ -12,7 +12,7 @@ from twitchAPI.twitch import Twitch
 
 
 @app_commands.guild_only()
-class TwitchCog(commands.Cog):
+class TwitchCog(commands.Cog, name="Twitch"):
     def __init__(self, bot: commands.Bot):
         load_dotenv()
         self.bot = bot
