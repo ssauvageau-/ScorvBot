@@ -47,11 +47,16 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         self, interaction: discord.Interaction, current: str
     ) -> List[app_commands.Choice[str]]:
         choices = [*self.tag_dict]
-        return [
+        tags = [
             app_commands.Choice(name=choice, value=choice)
             for choice in choices
             if current.lower() in choice.lower()
         ]
+        if len(tags) > 25:
+            return tags[:25]
+            # Discord autocomplete only supports 25 elements
+            # Without this, users are not shown any elements of the tag list when total tags > 25
+        return tags
 
     @app_commands.command(name="post", description="Post a tag in chat.")
     @app_commands.autocomplete(choice=tag_autocomplete)
