@@ -12,7 +12,7 @@ from utils import Sunder, log_utils
 utc = timezone.utc
 
 
-class Events(commands.Cog):
+class Events(commands.Cog, name="Events"):
     def __init__(self, bot: commands.Bot) -> None:
         self.logger = logging.getLogger("bot")
         self.log_channel_name = "scorv-log"
@@ -350,37 +350,7 @@ class Events(commands.Cog):
             hist = self.timeline.pop(
                 member, None
             )  # pop to remove entry from dict, but use it below
-            now = hist["disconnected"]
-            log_embed = discord.Embed(
-                color=discord.Color.green(),
-                title="User Disconnected from Voice",
-                timestamp=now,
-            )
-            log_embed.set_author(
-                name=member.display_name,
-                icon_url=member.display_avatar.url,
-            )
-            log_embed.add_field(
-                name="Last Channel Visited",
-                value=hist["last_channel"].name,
-                inline=False,
-            )
-            log_embed.add_field(
-                name="Time Spent in Voice",
-                value=hist["disconnected"] - hist["connected"],
-                inline=False,
-            )
-            old_time = hist["connected"]
-            for hop in hist["hops"]:
-                prev = hop["channel"]
-                time = hop["disconnected"] - old_time
-                log_embed.add_field(
-                    name="Previously In", value=f"{prev} for {time}", inline=False
-                )
-                old_time = hop["disconnected"]
-            # await log_channel.send(embed=log_embed)
-
-            diff = now - hist["connected"]
+            diff = hist["disconnected"] - hist["connected"]
             await log_channel.send(
                 content=f"<t:{int(datetime.now(tz=utc).timestamp())}:R>\t{member.mention} disconnected from {before.channel.name} after {diff} in total."
             )
