@@ -263,8 +263,8 @@ class Events(commands.Cog, name="Events"):
             raise Exception("Log channel not found")
 
         if (
-            "https://discord.gg/" in message.content.lower()
-            or "https://discord.com/" in message.content.lower()
+            "discord.gg/" in message.content.lower()
+            or "discord.com/invite/" in message.content.lower()
         ):
             log_embed = discord.Embed(
                 color=discord.Color.red(),
