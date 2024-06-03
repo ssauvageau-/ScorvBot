@@ -1,63 +1,5 @@
 import discord
 
-help_embed = discord.Embed(title="Command List", color=0xFF5733)
-help_embed.add_field(
-    name="commandList, commands", value="* Displays this help dialogue.", inline=False
-)
-help_embed.add_field(
-    name="clear",
-    value="Arguments: N (default=1)\n* Clears the previous N messages.",
-    inline=False,
-)
-help_embed.add_field(
-    name="clear-commands, clear-c",
-    value="Arguments: N (default=1)\n* Clears the previous N messages which begin "
-    "with the command prefix.",
-    inline=False,
-)
-help_embed.add_field(
-    name="create-channel, cc",
-    value="Arguments: Name (required)\n* Creates a text channel called Name.",
-    inline=False,
-)
-help_embed.add_field(
-    name="create-hidden-channel, chc",
-    value="Arguments: Name (required), IDs (optional, supports multiple)\n"
-    "* Creates a hidden text channel called Name that only those with the "
-    "given IDs can view, along with the bot and the server owner.",
-    inline=False,
-)
-help_embed.add_field(
-    name="create-hidden-channel-no-bot, chcnb",
-    value="Arguments: Name (required), IDs (optional, supports multiple)\n"
-    "* Creates a hidden text channel called Name that only those with"
-    " the given IDs can view, along with the server owner.",
-    inline=False,
-)
-help_embed.add_field(
-    name="create-role, new-role, cr",
-    value="Arguments: Name (required)\n"
-    "* Creates the Name role if it does not exist, or informs the user if it "
-    "does.",
-    inline=False,
-)
-help_embed.add_field(
-    name="delete-role, dr",
-    value="Arguments: Name (required)\n"
-    "* Deletes the role named Name, or informs the user that no such role exists.",
-    inline=False,
-)
-help_embed.add_field(
-    name="help",
-    value="* Generates the default discord.py help message with no documentation.",
-    inline=False,
-)
-help_embed.add_field(
-    name="quit, q",
-    value="* Shuts down the bot." "\n\nOnly the bot author can use this command.",
-    inline=False,
-)
-
 welcome_embed = discord.Embed(color=0x1E1F22)
 welcome_embed.add_field(
     name="Welcome to the Community Grim Dawn Discord Server",
@@ -65,6 +7,34 @@ welcome_embed.add_field(
     "iron is valued above gold and trust is hard earned. Grim Dawn features complex character development, "
     "hundreds of unique items, crafting, and quests with choice & consequence.",
     inline=False,
+)
+welcome_text = "# Welcome to the Community Grim Dawn Discord Server"
+global_text = (
+    "## Global Server Rules"
+    "\n1. Follow the rules outlined below for the various channels."
+    "\n2. Keep discussions civil and respect the ideas of others even if you disagree with them. Hate speech and any kind of discrimination will not be tolerated."
+    "\n3. Please keep all discussions on the server in English, as this is the language spoken by all moderation staff."
+    "\n4. Posting pornographic, disturbing, illegal images/links is strictly prohibited. Examples of such prohibited content include, but are not limited to: real or disturbing depictions of violence; content that exploits children in any way and sexually explicit content."
+    "\n5. Engagement in/promotion of unlawful activity is strictly prohibited. Examples of such prohibited activity include, but are not limited to: exploiting minors; stealing; encouraging real-world violence; engaging in fraud; piracy; hacking; breaking copyright laws. Discussion of piracy is prohibited, and no support will be given for issues arising from use of a pirated game copy."
+)
+global_text2 = (
+    "6. Let the moderators handle all moderation duties. If you find an issue, please mention the <@&137735685674106880> role to ping them and let them handle the issue. Entangling yourself in the issue will only cause more disruption. Disagreements in DM's should be handled by users themselves (block if necessary). Exceptions to this are: 1) scam attempts, and 2) users trying to circumvent moderation on the server by taking harassment to DM's instead. In such cases, **please DM a moderator with screenshots of the conversation**. All reported issues will be handled on a case-by-case basis."
+    "\n7. Do not advertise or encourage anything that is against the TOS/EULA of Grim Dawn. Respect the Terms of Service & Guidelines of Discord - <https://discord.com/terms> | <https://discord.com/guidelines>"
+    "\n8. Do not advertise any kind of Discord/community/campaign or other links without permission. Users have global permission to post the links below at-will within reasonable contexts."
+    "\n9. Political discussions and topics shall be kept short or entirely avoided if possible in all channels."
+)
+global_text3 = (
+    "### ↓Whitelisted Discord Links↓"
+    "\n**Grim Dawn** (you are here)"
+    "\n* <https://discord.gg/8Dr8mge>"
+    "\n**Farthest Frontier**"
+    "\n* <https://discord.gg/WbBWWuAYjh>"
+    "\n**Grim Dawn League**"
+    "\n* <https://discord.gg/n94PcmV>"
+    "\n**Grimarillion & DoM Community**"
+    "\n* <https://discordapp.com/invite/GNqqDUz>"
+    "\n**Dammitt's Tools**"
+    "\n* <https://discord.gg/8uEhMAkxHc>"
 )
 global_embed = discord.Embed(color=0x1E1F22)
 global_embed.add_field(
@@ -89,12 +59,28 @@ global_embed2.add_field(
     "<@&137735685674106880> tag to ping them and let them handle the issue. Entangling yourself in the issue "
     'will only cause more disruption. Disagreements in DM\'s should be handled by users themselves ("block" if '
     "necessary). Exceptions to this are: 1) scam attempts, and 2) users trying to circumvent moderation on the "
-    "server by taking harassment to DM's instead. In such cases, please DM a moderator with screenshots of the "
-    "conversation. All reported issues will be handled on a case-by-case basis. "
+    "server by taking harassment to DM's instead. In such cases, **please DM a moderator with screenshots of the "
+    "conversation**. All reported issues will be handled on a case-by-case basis. "
     "\n**7**. Do not advertise or encourage anything that is against the TOS/EULA of Grim Dawn. Respect the Terms of "
     "Service & Guidelines of Discord - https://discord.com/terms | https://discord.com/guidelines "
-    "\n**8**. Do not advertise any kind of Discord/community/campaign or other links without permission."
+    "\n**8**. Do not advertise any kind of Discord/community/campaign or other links without permission. Users have "
+    "global permission to post the links below at-will within reasonable contexts."
     "\n**9**. Political discussions and topics shall be kept short or entirely avoided if possible in all channels.",
+)
+global_embed3 = discord.Embed(color=0x1E1F22)
+global_embed3.add_field(
+    name="",
+    value="**↓Whitelisted Discord Links↓**:"
+    "\n**Grim Dawn** (you are here)"
+    "\nhttps://discord.gg/8Dr8mge"
+    "\n**Farthest Frontier**"
+    "\nhttps://discord.gg/WbBWWuAYjh"
+    "\n**Grim Dawn League"
+    "\nhttps://discord.gg/n94PcmV"
+    "\n**Grimarillion & DoM Community"
+    "\nhttps://discordapp.com/invite/GNqqDUz"
+    "\n**Dammitt's Tools"
+    "\nhttps://discord.gg/8uEhMAkxHc",
 )
 channel_news_embed = discord.Embed(color=0x1E1F22)
 channel_news_embed.add_field(
@@ -102,8 +88,8 @@ channel_news_embed.add_field(
     value="<#137741704944943105>"
     "\nNews about recent important events related to Grim Dawn."
     "\n<#480494439564050443>"
-    "\nThis channel will be updated with the official Crate Entertainment [Twitter](https://twitter.com/grimdawn)"
-    " and [Twitch](https://www.twitch.tv/crateentertainment) account activity."
+    "\nThis channel will be updated with the official Crate Entertainment "
+    "[Twitch](https://www.twitch.tv/crateentertainment) account activity."
     "\n<#1150483398754836530>"
     "\nThis channel will be updated with updates to this server.",
     inline=False,
