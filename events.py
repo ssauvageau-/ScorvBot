@@ -225,23 +225,35 @@ class Events(commands.Cog, name="Events"):
             mask = masked_url.group("mask")
             url = masked_url.group("url")
 
+            steam = "steamcommunity.com/" in mask.lower()
+
             log_embed = discord.Embed(
-                color=discord.Color.yellow(),
-                title="Masked URL in message",
+                color=discord.Color.red() if steam else discord.Color.yellow(),
+                title="Steam URL Mask Detected & Deleted"
+                if steam
+                else "Masked URL in message",
+                description=message.author.mention,
                 timestamp=message.created_at,
             )
             log_embed.set_author(
                 name=message.author.display_name,
                 icon_url=message.author.display_avatar.url,
             )
-            log_embed.add_field(name="Message", value=message.jump_url, inline=True)
+            if not steam:
+                log_embed.add_field(name="Message", value=message.jump_url, inline=True)
             log_embed.add_field(name="Mask", value=f"`{mask}`", inline=True)
             log_embed.add_field(name="URL", value=f"`{url}`", inline=True)
 
             await log_channel.send(embed=log_embed)
-            self.logger.info(
-                f"Masked URL [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)} {message.jump_url}"
-            )
+            if not steam:
+                self.logger.info(
+                    f"Masked URL [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)} {message.jump_url}"
+                )
+            else:
+                self.logger.info(
+                    f"Steam URL Mask [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)}. Message Deleted."
+                )
+                await message.delete()
 
     @commands.Cog.listener(name="on_message")
     async def discord_link_event(self, message: discord.Message):
@@ -250,10 +262,8 @@ class Events(commands.Cog, name="Events"):
 
         roles = []
         for role in message.author.roles:
-            roles.append(role.name)
-
-        if "Admin" in roles or "Moderator" in roles:
-            return
+            if role.name in ["Admin", "Moderator"]:
+                return
 
         log_channel = discord.utils.find(
             lambda channel: channel.name == self.log_channel_name,
@@ -262,13 +272,27 @@ class Events(commands.Cog, name="Events"):
         if log_channel is None:
             raise Exception("Log channel not found")
 
+        whitelist = [
+            "8Dr8mge",  # Grim Dawn
+            "WbBWWuAYjh",  # Farthest Frontier
+            "n94PcmV",  # GD League
+            "8uEhMAkxHc",  # Dammitt's Tools
+            "GNqqDUz",  # Grimarillion & DoM
+        ]
+
         if (
             "discord.gg/" in message.content.lower()
             or "discord.com/invite/" in message.content.lower()
+            or "discordapp.com/invite/" in message.content.lower()
         ):
+            for approved in whitelist:
+                if approved in message.content.lower():
+                    return
+
             log_embed = discord.Embed(
                 color=discord.Color.red(),
                 title="Discord Link Posted",
+                description=message.author.mention,
                 timestamp=message.created_at,
             )
             log_embed.set_author(
