@@ -33,22 +33,15 @@ class GraphRoleCommandGroup(app_commands.Group, name="graph-roles"):
         pruned_roles = [role for role in role_list if role.name in masteries]
         pruned_roles.reverse()
         usage = [len(role.members) for role in pruned_roles]
+        colors = [
+            tuple(rgb / 255.0 for rgb in role.color.to_rgb()) for role in pruned_roles
+        ]
 
         ypos = np.arange(len(masteries))
         plt.bar(
             ypos,
             usage,
-            color=[
-                "#f5d166",  # Soldier
-                "#e68033",  # Demolitionist
-                "#d41867",  # Occultist
-                "#4766ff",  # Nightblade
-                "#00e8a8",  # Arcanist
-                "#3399cc",  # Shaman
-                "#7370ff",  # Inquisitor
-                "#8cd9cc",  # Necromancer
-                "#b32626",  # Oathkeeper
-            ],
+            color=colors,
         )
         plt.xticks(ypos, masteries, rotation=45, ha="right")
         plt.tight_layout()
