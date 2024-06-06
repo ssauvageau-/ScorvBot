@@ -39,15 +39,15 @@ class GraphRoleCommandGroup(app_commands.Group, name="graph-roles"):
             ypos,
             usage,
             color=[
-                "yellow",
-                "orange",
-                "pink",
-                "teal",
-                "green",
-                "cyan",
-                "purple",
-                "turquoise",
-                "peru",
+                "#f5d166",  # Soldier
+                "#e68033",  # Demolitionist
+                "#d41867",  # Occultist
+                "#4766ff",  # Nightblade
+                "#00e8a8",  # Arcanist
+                "#3399cc",  # Shaman
+                "#7370ff",  # Inquisitor
+                "#8cd9cc",  # Necromancer
+                "#b32626",  # Oathkeeper
             ],
         )
         plt.xticks(ypos, masteries, rotation=45, ha="right")
