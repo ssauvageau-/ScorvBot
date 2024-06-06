@@ -286,7 +286,7 @@ class Events(commands.Cog, name="Events"):
             or "discordapp.com/invite/" in message.content.lower()
         ):
             for approved in whitelist:
-                if approved in message.content.lower():
+                if approved in message.content:
                     return
 
             log_embed = discord.Embed(
