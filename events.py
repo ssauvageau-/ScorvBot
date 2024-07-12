@@ -226,12 +226,19 @@ class Events(commands.Cog, name="Events"):
             url = masked_url.group("url")
 
             steam = "steamcommunity.com/" in mask.lower()
+            dismiss = "dismiss message" in mask.lower()
 
             log_embed = discord.Embed(
-                color=discord.Color.red() if steam else discord.Color.yellow(),
+                color=discord.Color.red()
+                if (steam or dismiss)
+                else discord.Color.yellow(),
                 title="Steam URL Mask Detected & Deleted"
                 if steam
-                else "Masked URL in message",
+                else (
+                    "Dismiss Message Scam Detected & Deleted"
+                    if dismiss
+                    else "Masked URL in message"
+                ),
                 description=message.author.mention,
                 timestamp=message.created_at,
             )
@@ -239,21 +246,26 @@ class Events(commands.Cog, name="Events"):
                 name=message.author.display_name,
                 icon_url=message.author.display_avatar.url,
             )
-            if not steam:
+            if not steam or not dismiss:
                 log_embed.add_field(name="Message", value=message.jump_url, inline=True)
             log_embed.add_field(name="Mask", value=f"`{mask}`", inline=True)
             log_embed.add_field(name="URL", value=f"`{url}`", inline=True)
 
             await log_channel.send(embed=log_embed)
-            if not steam:
-                self.logger.info(
-                    f"Masked URL [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)} {message.jump_url}"
-                )
-            else:
+            if steam:
                 self.logger.info(
                     f"Steam URL Mask [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)}. Message Deleted."
                 )
                 await message.delete()
+            elif dismiss:
+                self.logger.info(
+                    f"Dismiss Message Scam [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)}. Message Deleted."
+                )
+                await message.delete()
+            else:
+                self.logger.info(
+                    f"Masked URL [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)} {message.jump_url}"
+                )
 
     @commands.Cog.listener(name="on_message")
     async def discord_link_event(self, message: discord.Message):
