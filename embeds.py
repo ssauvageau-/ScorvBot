@@ -79,6 +79,8 @@ global_embed3.add_field(
     "\nhttps://discord.gg/n94PcmV"
     "\n**Grimarillion & DoM Community"
     "\nhttps://discordapp.com/invite/GNqqDUz"
+    "\n**Reign of Terror Mod Discord"
+    "\nhttps://discord.gg/eSRNSqGk22"
     "\n**Dammitt's Tools"
     "\nhttps://discord.gg/8uEhMAkxHc",
 )

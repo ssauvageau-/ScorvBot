@@ -278,6 +278,7 @@ class Events(commands.Cog, name="Events"):
             "n94PcmV",  # GD League
             "8uEhMAkxHc",  # Dammitt's Tools
             "GNqqDUz",  # Grimarillion & DoM
+            "eSRNSqGk22",  # Reign of Terror
         ]
 
         if (
