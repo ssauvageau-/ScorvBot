@@ -1,5 +1,6 @@
 import os
-from typing import Optional
+from typing import Dict, Optional
+import json
 
 from PIL import Image, ImageSequence
 import discord
@@ -15,8 +16,28 @@ class MiscCommandCog(commands.Cog, name="Misc"):
         self.bot = bot
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
+
+        self.data_path = "json/data.json"
+        try:
+            self.data = self.load_data()
+        except json.decoder.JSONDecodeError:
+            self.data = {}
+        except FileNotFoundError:
+            self.data = {}
+            if not os.path.exists("json"):
+                os.makedirs("json")
+            os.close(os.open(self.data_path, os.O_CREAT))
+
         self.log_channel = "scorv-log"
         super().__init__()
+
+    def load_data(self) -> Dict[str, Dict]:
+        with open(self.data_path, "r", encoding="utf-8") as disk_lib:
+            return json.loads(disk_lib.read())
+
+    def dump_data(self) -> None:
+        with open(self.data_path, "w", encoding="utf-8") as disk_lib:
+            disk_lib.write(json.dumps(self.data, sort_keys=True))
 
     @app_commands.command(name="f", description="Pay respects. 'to' is optional.")
     async def pay_respects(
@@ -30,6 +51,32 @@ class MiscCommandCog(commands.Cog, name="Misc"):
             await interaction.response.send_message("Press 🇫 to pay respects.")
         response = await interaction.original_response()
         await response.add_reaction("🇫")
+
+    @app_commands.command(
+        name="foa-meme",
+        description="Increment a counter and post a message letting users know the FoA expansion has been delayed!",
+    )
+    @app_commands.checks.has_any_role("Admin", "Moderator", "Crate Entertainment")
+    async def expansion_meme(
+        self, interaction: discord.Interaction, user: discord.User
+    ):
+        num = self.data.get("foa_delay")
+        if num is None:
+            num = 0
+        else:
+            num = int(num)
+        await interaction.response.send_message(
+            "Sending the FoA meme message below:", ephemeral=True
+        )
+        day_term = "Day" if num == 0 else "Days"
+        await interaction.channel.send(
+            f"Thank you, {user.mention}, for inquiring about the release date of Grim Dawn's upcoming expansion, Fangs of Asterkarn!"
+            f"\nUnfortunately, every time this question is asked the expansion is delayed another day."
+            f"\n\n\tCurrent Delay: {num + 1} {day_term}"
+            f"\n\nWorry not, the expansion will be made available **posthaste**!"
+        )
+        self.data["foa_delay"] = num + 1
+        self.dump_data()
 
     @app_commands.command(
         name="scorv-post", description="Send a text message as Scorv! Limited access!"
