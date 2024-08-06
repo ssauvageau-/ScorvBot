@@ -17,24 +17,29 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
         await interaction.response.defer(thinking=True, ephemeral=True)
-        await channel.purge()
+        name = channel.name
+        pos = channel.position
+        cat = channel.category
+        new_ch = await channel.clone(name=name + "-t")
+        await channel.delete()
+        await new_ch.edit(name=name, position=pos, category=cat)
         logo = discord.File("images/Grim_Dawn_Discord_Logo.png")
-        await channel.send(file=logo)
+        await new_ch.send(file=logo)
         divider = discord.File("images/divider.png")
-        await channel.send(file=divider)
+        await new_ch.send(file=divider)
         # await channel.send(embed=embeds.welcome_embed)
-        await channel.send(embeds.welcome_text)
+        await new_ch.send(embeds.welcome_text)
         # attitude = discord.File("images/attitude.png")
         # await channel.send(file=attitude)
-        await channel.send(embeds.global_text)
-        await channel.send(embeds.global_text2)
-        await channel.send(embeds.global_text3)
+        await new_ch.send(embeds.global_text)
+        await new_ch.send(embeds.global_text2)
+        await new_ch.send(embeds.global_text3)
         # await channel.send(embed=embeds.global_embed)
         # await channel.send(embed=embeds.global_embed2)
         # await channel.send(embed=embeds.global_embed3)
         channel_rules = discord.File("images/channelRules.png")
-        await channel.send(file=channel_rules)
-        await channel.send(
+        await new_ch.send(file=channel_rules)
+        await new_ch.send(
             embeds=[
                 embeds.channel_news_embed,
                 embeds.channel_gd_embed,
@@ -43,10 +48,10 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
             ]
         )
         chat_roles = discord.File("images/chatRoles.png")
-        await channel.send(file=chat_roles)
-        await channel.send(embed=embeds.chat_roles_embed)
+        await new_ch.send(file=chat_roles)
+        await new_ch.send(embed=embeds.chat_roles_embed)
         await interaction.followup.send(
-            f"Posted rules in {channel.mention}", ephemeral=True
+            f"Posted rules in {new_ch.mention}", ephemeral=True
         )
 
     @app_commands.command(name="post-links", description="Post the generated links")
@@ -56,10 +61,15 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
         await interaction.response.defer(thinking=True, ephemeral=True)
-        await channel.purge()
+        name = channel.name
+        pos = channel.position
+        cat = channel.category
+        new_ch = await channel.clone(name=name + "-t")
+        await channel.delete()
+        await new_ch.edit(name=name, position=pos, category=cat)
         buy_now = discord.File("images/buynow.png")
-        await channel.send(file=buy_now)
-        await channel.send(
+        await new_ch.send(file=buy_now)
+        await new_ch.send(
             embeds=[
                 embeds.buy_gd_embed,
                 embeds.buy_aom_embed,
@@ -68,10 +78,10 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
             ]
         )
         links = discord.File("images/linkbase.png")
-        await channel.send(file=links)
-        await channel.send(embed=embeds.links_embed)
+        await new_ch.send(file=links)
+        await new_ch.send(embed=embeds.links_embed)
         await interaction.followup.send(
-            f"Posted links in {channel.mention}", ephemeral=True
+            f"Posted links in {new_ch.mention}", ephemeral=True
         )
 
     @post_rules.error
