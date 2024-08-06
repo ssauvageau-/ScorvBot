@@ -17,29 +17,24 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
         await interaction.response.defer(thinking=True, ephemeral=True)
-        name = channel.name
-        pos = channel.position
-        cat = channel.category
-        new_ch = await channel.clone(name=name + "-t")
-        await channel.delete()
-        await new_ch.edit(name=name, position=pos, category=cat)
+        await channel.purge(bulk=False)
         logo = discord.File("images/Grim_Dawn_Discord_Logo.png")
-        await new_ch.send(file=logo)
+        await channel.send(file=logo)
         divider = discord.File("images/divider.png")
-        await new_ch.send(file=divider)
+        await channel.send(file=divider)
         # await channel.send(embed=embeds.welcome_embed)
-        await new_ch.send(embeds.welcome_text)
+        await channel.send(embeds.welcome_text)
         # attitude = discord.File("images/attitude.png")
         # await channel.send(file=attitude)
-        await new_ch.send(embeds.global_text)
-        await new_ch.send(embeds.global_text2)
-        await new_ch.send(embeds.global_text3)
+        await channel.send(embeds.global_text)
+        await channel.send(embeds.global_text2)
+        await channel.send(embeds.global_text3)
         # await channel.send(embed=embeds.global_embed)
         # await channel.send(embed=embeds.global_embed2)
         # await channel.send(embed=embeds.global_embed3)
         channel_rules = discord.File("images/channelRules.png")
-        await new_ch.send(file=channel_rules)
-        await new_ch.send(
+        await channel.send(file=channel_rules)
+        await channel.send(
             embeds=[
                 embeds.channel_news_embed,
                 embeds.channel_gd_embed,
@@ -48,10 +43,10 @@ class AnnouncementCommandGroup(app_commands.Group, name="announcements"):
             ]
         )
         chat_roles = discord.File("images/chatRoles.png")
-        await new_ch.send(file=chat_roles)
-        await new_ch.send(embed=embeds.chat_roles_embed)
+        await channel.send(file=chat_roles)
+        await channel.send(embed=embeds.chat_roles_embed)
         await interaction.followup.send(
-            f"Posted rules in {new_ch.mention}", ephemeral=True
+            f"Posted rules in {channel.mention}", ephemeral=True
         )
 
     @app_commands.command(name="post-links", description="Post the generated links")
