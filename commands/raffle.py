@@ -68,6 +68,7 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
                 continue
             if self.raffle_dict[member]["id"] == int(id):
                 del self.raffle_dict[member]
+                self.dump_raffle()
                 await interaction.response.send_message(
                     f"Removed {member} from the raffle!"
                 )
