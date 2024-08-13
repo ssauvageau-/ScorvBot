@@ -17,6 +17,8 @@ class Events(commands.Cog, name="Events"):
         self.logger = logging.getLogger("bot")
         self.log_channel_name = "scorv-log"
         self.log_channel_name_alt = "scorv-log2"
+        self.log_channel_name_md = "scorv-log-md"
+        self.last_deleted = 0
         self.bot = bot
         self.timeline = {}
 
@@ -93,6 +95,7 @@ class Events(commands.Cog, name="Events"):
 
         if message.content.lower() == "nerd":
             await message.channel.send(message.content)
+            self.last_deleted = message.id
             await message.delete()
             self.logger.info(f"nerd event triggered on message {message.jump_url}")
 
@@ -175,6 +178,7 @@ class Events(commands.Cog, name="Events"):
         think = thinkematics_tm.get(pruned)
         if think is not None:
             think_message = await message.channel.send(think)
+            self.last_deleted = message.id
             await message.delete()
             self.logger.info(
                 f"Thinkematics {think} triggered by {message.author.display_name} {think_message.jump_url}"
@@ -256,11 +260,13 @@ class Events(commands.Cog, name="Events"):
                 self.logger.info(
                     f"Steam URL Mask [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)}. Message Deleted."
                 )
+                self.last_deleted = message.id
                 await message.delete()
             elif dismiss:
                 self.logger.info(
                     f"Dismiss Message Scam [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)}. Message Deleted."
                 )
+                self.last_deleted = message.id
                 await message.delete()
             else:
                 self.logger.info(
@@ -324,7 +330,28 @@ class Events(commands.Cog, name="Events"):
             await message.reply(
                 content=f"{message.author.display_name} - please do not share Discord links in this server! Thank you! :)"
             )
+            self.last_deleted = message.id
             await message.delete()
+
+    @commands.Cog.listener(name="on_message_delete")
+    async def message_deleted(self, message: discord.Message):
+        if message.id == self.last_deleted:
+            return
+        log_channel = discord.utils.find(
+            lambda channel: channel.name == self.log_channel_name_md,
+            message.channel.guild.channels,
+        )
+        if log_channel is None:
+            raise Exception("Log channel not found")
+        log = f"At <t:{int(datetime.now(tz=utc).timestamp())}:R> the following message by {message.author.mention} was deleted:\n{message.content}"
+        try:
+            atchs = [await atch.to_file(spoiler=True) for atch in message.attachments]
+            await log_channel.send(content=log, files=atchs)
+        except:
+            await log_channel.send(
+                content=f"{log}\n\n**Additional files were identified but not cached by the server and could not be replicated.**"
+            )
+        ...
 
     @commands.Cog.listener()
     async def on_voice_state_update(
