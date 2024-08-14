@@ -62,6 +62,7 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
         name="remove",
         description="Remove a user from the current raffle based on their discord userid.",
     )
+    @app_commands.checks.has_any_role("Admin", "Moderator")
     async def raffle_remove(self, interaction: discord.Interaction, id: str):
         for member in self.raffle_dict:
             if member == self.raffle_config:
