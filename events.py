@@ -343,15 +343,28 @@ class Events(commands.Cog, name="Events"):
         )
         if log_channel is None:
             raise Exception("Log channel not found")
-        log = f"At <t:{int(datetime.now(tz=utc).timestamp())}:R> the following message by {message.author.mention} was deleted:\n{message.content}"
-        try:
-            atchs = [await atch.to_file(spoiler=True) for atch in message.attachments]
-            await log_channel.send(content=log, files=atchs)
-        except:
-            await log_channel.send(
-                content=f"{log}\n\n**Additional files were identified but not cached by the server and could not be replicated.**"
+
+        log_embed = discord.Embed(
+            color=discord.Color.red(),
+            title="Messaage Deleted",
+            description=f"```diff\n- {message.content.replace('```', '``')}\n```",
+            timestamp=datetime.now(tz=utc),
+        )
+        log_embed.set_author(
+            name=message.author.display_name,
+            icon_url=message.author.display_avatar.url,
+        )
+        log_embed.set_footer(text=f"#{message.channel.name}")
+
+        if len(message.attachments) > 0:
+            log_embed.add_field(
+                name="Files",
+                value="\n".join(
+                    [att.url or att.proxy_url for att in message.attachments]
+                ),
             )
-        ...
+
+        await log_channel.send(embed=log_embed)
 
     @commands.Cog.listener()
     async def on_voice_state_update(
