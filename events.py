@@ -344,10 +344,11 @@ class Events(commands.Cog, name="Events"):
         if log_channel is None:
             raise Exception("Log channel not found")
 
+        formatted_message = message.content.replace("```", "``").replace("\n", "\n- ")
         log_embed = discord.Embed(
             color=discord.Color.red(),
             title="Messaage Deleted",
-            description=f"```diff\n- {message.content.replace('```', '``')}\n```",
+            description=f"```diff\n- {formatted_message}\n```",
             timestamp=datetime.now(tz=utc),
         )
         log_embed.set_author(
