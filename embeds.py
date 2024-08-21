@@ -11,7 +11,7 @@ welcome_embed.add_field(
 welcome_text = "# Welcome to the Community Grim Dawn Discord Server"
 global_text = (
     "## Global Server Rules"
-    "\n1. Keep discussions civil and respect the ideas of others even if you disagree with them. Hate speech and any kind of discrimination will not be tolerated."
+    "\n1. Keep discussions civil and respect the ideas of others even if you disagree with them. Hate speech and any kind of discrimination will not be tolerated - this includes (but is not limited to) any form of racism, homophobia, transphobia, sexism, xenophobia, or blatant disrespect."
     "\n2. Please keep all discussions on the server in English, as this is the language spoken by all moderation staff."
     "\n3. Posting pornographic, disturbing, illegal images/links is strictly prohibited. Examples of such prohibited content include, but are not limited to: real or disturbing depictions of violence; content that exploits children in any way and sexually explicit content. Please notify a <@&137735685674106880> of any such content violations."
     "\n4. Engagement in/promotion of unlawful activity is strictly prohibited. Examples of such prohibited activity include, but are not limited to: exploiting minors; stealing; encouraging real-world violence; engaging in fraud; piracy; hacking; breaking copyright laws. Discussion of piracy is prohibited, and no support will be given for issues arising from use of a pirated game copy. Please notify a <@&137735685674106880> of any such violations."
