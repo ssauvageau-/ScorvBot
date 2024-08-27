@@ -89,9 +89,6 @@ channel_news_embed.add_field(
     name="Global",
     value="<#137741704944943105>"
     "\nNews about recent important events related to Grim Dawn."
-    "\n<#480494439564050443>"
-    "\nThis channel will be updated with the official Crate Entertainment "
-    "[Twitch](https://www.twitch.tv/crateentertainment) account activity."
     "\n<#1150483398754836530>"
     "\nThis channel will be updated with updates to this server.",
     inline=False,
@@ -104,7 +101,7 @@ channel_offtopic_embed.add_field(
     "\n<#144781923590471680>"
     "\nEverything is allowed within range of the rules but use common sense."
     "\n<#602362713863094322>"
-    "\nPost memes. Be ***respectful***, no clearly over the line offensive content please."
+    "\nChannel archived for month of September. See https://discord.com/channels/119758608765288449/1150483398754836530/1276164130251739166"
     "\n<#653698423945560075>"
     "\nFor sharing and discussing music, commonly through YouTube.",
     inline=False,
