@@ -357,6 +357,19 @@ class Events(commands.Cog, name="Events"):
         )
         log_embed.set_footer(text=f"#{message.channel.name}")
 
+        # Query audit logs to see if a moderator deleted the message
+        deleter = None
+        async for log in message.guild.audit_logs(
+            limit=5, action=discord.AuditLogAction.message_delete
+        ):
+            target = log._convert_target_user(log._target_id)
+            if target and target.id == message.author.id:
+                deleter = log.user
+                break
+
+        if deleter is not None:
+            log_embed.add_field(name="Deleted By", value=deleter.mention)
+
         if len(message.attachments) > 0:
             log_embed.add_field(
                 name="Files",
