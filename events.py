@@ -261,7 +261,9 @@ class Events(commands.Cog, name="Events"):
                     f"Steam URL Mask [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)}. Message Deleted."
                 )
                 self.last_deleted = message.id
-                await message.delete()
+                await message.author.ban(
+                    delete_message_seconds=3600, reason="Malicious Steam URL Mask"
+                )
             elif dismiss:
                 self.logger.info(
                     f"Dismiss Message Scam [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)}. Message Deleted."
