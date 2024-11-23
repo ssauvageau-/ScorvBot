@@ -133,7 +133,10 @@ class MiscCommandCog(commands.Cog, name="Misc"):
             description=message.content,
         )
         tmp_embed.add_field(name="", value=message.jump_url)
-        tmp_embed.set_author(name=message.author.name, icon_url=message.author.avatar)
+        tmp_embed.set_author(
+            name=message.author.display_name or message.author.name,
+            icon_url=message.author.avatar,
+        )
         await interaction.response.send_message(embed=tmp_embed)
 
     @app_commands.command(name="mobile")
