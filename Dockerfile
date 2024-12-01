@@ -11,7 +11,7 @@ RUN apk --no-cache add libffi python3-dev
 # Necessary manual package install for discord.py on Python 3.13
 RUN pip install --no-cache-dir libnacl
 
-# Install scorbBot python dependencies
+# Install scorvbot python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
