@@ -110,7 +110,9 @@ class TemporaryBanModal(discord.ui.Modal):
             ephemeral=True,
         )
 
+
 SPY_BOTS = "https://gist.githubusercontent.com/Dziurwa14/05db50c66e4dcc67d129838e1b9d739a/raw/b0c0ebba557521e9234074a22e544ab48f448f6a/spy.pet%20accounts"
+
 
 @app_commands.guild_only()
 class ModerationCommandGroup(app_commands.Group, name="moderation"):
@@ -130,7 +132,7 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
         self.log_channel_name = "scorv-log"
         self.bot = bot
         self.spy_bots = requests.get(SPY_BOTS).json()
-        self._session = None # filled in `reload_spy_bots` function so we don't get DeprecationWarning
+        self._session = None  # filled in `reload_spy_bots` function so we don't get DeprecationWarning
         super().__init__()
 
     @commands.command(name="reload-spy-bots")
