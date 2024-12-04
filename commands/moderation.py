@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp
 from datetime import datetime, timedelta, timezone
 import json
@@ -110,7 +112,9 @@ class TemporaryBanModal(discord.ui.Modal):
             ephemeral=True,
         )
 
+
 SPY_BOTS = "https://gist.githubusercontent.com/Dziurwa14/05db50c66e4dcc67d129838e1b9d739a/raw/b0c0ebba557521e9234074a22e544ab48f448f6a/spy.pet%20accounts"
+
 
 @app_commands.guild_only()
 class ModerationCommandGroup(app_commands.Group, name="moderation"):
@@ -130,7 +134,7 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
         self.log_channel_name = "scorv-log"
         self.bot = bot
         self.spy_bots = requests.get(SPY_BOTS).json()
-        self._session = None # filled in `reload_spy_bots` function so we don't get DeprecationWarning
+        self._session = None  # filled in `reload_spy_bots` function so we don't get DeprecationWarning
         super().__init__()
 
     @commands.command(name="reload-spy-bots")
@@ -195,6 +199,57 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             await interaction.channel.purge(limit=deletion)
 
         await interaction.followup.send(f"Deleted {number} messages", ephemeral=True)
+
+    @app_commands.command(
+        name="range-delete",
+        description="Delete all messages in a channel that occur between two supplied messages, inclusive.",
+    )
+    @app_commands.describe(
+        msg_one="ID of the first of the two message block limits, inclusive.",
+        msg_two="ID of the second of the two message block limits, inclusive.",
+    )
+    @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
+    async def range_delete(
+        self,
+        interaction: discord.Interaction,
+        msg_one: str,
+        msg_two: str,
+        limit: int = 200,
+    ):
+        chan = interaction.channel
+        m1 = await chan.fetch_message(int(msg_one))
+        m2 = await chan.fetch_message(int(msg_two))
+        if m1 is None or m2 is None:
+            await interaction.response.send_message(
+                "Messages not found in calling channel, terminating operation.\nYou must use this command from the channel that contains both messages.",
+                ephemeral=True,
+            )
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        hist = [message async for message in chan.history(limit=limit)]
+        print(hist)
+        bound1, bound2 = 0, 0
+        for x in range(len(hist)):
+            if hist[x].id == int(msg_one):
+                bound1 = x
+            elif hist[x].id == int(msg_two):
+                bound2 = x
+        if bound1 == 0 or bound2 == 0:
+            await interaction.followup.send(
+                f"Messages not found within history of {limit} messages in channel.",
+                ephemeral=True,
+            )
+        # python list slicing is [x:y) by default, need to add 1 to upper bound
+        deletions = (
+            hist[bound1 : bound2 + 1] if bound1 < bound2 else hist[bound2 : bound1 + 1]
+        )
+        queue = [deletions[i : i + 5] for i in range(0, len(deletions), 5)]
+        for batch in queue:
+            for msg in batch:
+                await msg.delete()
+            await asyncio.sleep(1)
+        await interaction.followup.send(
+            f"Deleted {len(deletions)} messages.", ephemeral=True
+        )
 
     @temporary_ban_member.error
     @clear.error
