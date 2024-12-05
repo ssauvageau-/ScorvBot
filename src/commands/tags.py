@@ -105,6 +105,21 @@ class TagSystemGroup(app_commands.Group, name="tag"):
                 "Tag successfully removed.", ephemeral=True
             )
 
+    @app_commands.command(
+        name="redis-migrate",
+        description="Migrate all existing tags from the json 'db' to Redis. WARNING - Don't run this twice!",
+    )
+    @app_commands.checks.has_any_role("Admin")
+    async def redis_migrate(self, interaction: discord.Interaction):
+        num_set = await self.redis_client.hset(
+            name=REDIS_TAGS_KEY_NAME,
+            mapping={k: json.dumps(v) for k, v in self.tag_dict.items()},
+        )
+        await interaction.response.send_message(
+            f"Inserted {num_set} tags(s) into the Redis!",
+            silent=True,
+        )
+
     @remove_tag.error
     async def remove_tag_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
