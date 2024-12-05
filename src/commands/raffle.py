@@ -6,6 +6,7 @@ import datetime as dt
 import random
 
 import discord
+import redis.asyncio as redis
 from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -13,9 +14,10 @@ from dotenv import load_dotenv
 
 @app_commands.guild_only()
 class RaffleCommandGroup(app_commands.Group, name="raffle"):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot, redis_client: redis.Redis):
         load_dotenv()
         self.bot = bot
+        self.redis_client = redis_client
         self.raffle_json_path = os.getenv("RAFFLE_JSON_PATH")
         self.raffle_config = os.getenv("RAFFLE_CONFIG_NAME")
         try:

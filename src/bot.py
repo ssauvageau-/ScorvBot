@@ -39,7 +39,7 @@ class ScorvBot(commands.Bot):
 
         # Add command cogs here
         await self.add_cog(Events(self))
-        await self.add_cog(MiscCommandCog(self))
+        await self.add_cog(MiscCommandCog(self, redis_client))
         await self.add_cog(TaskCog(self))
 
         # Add application command groups here
@@ -47,7 +47,7 @@ class ScorvBot(commands.Bot):
         self.tree.add_command(AssignRoleCommandGroup(self))
         self.tree.add_command(TagSystemGroup(self, redis_client))
         self.tree.add_command(GraphRoleCommandGroup(self))
-        self.tree.add_command(RaffleCommandGroup(self))
+        self.tree.add_command(RaffleCommandGroup(self, redis_client))
         self.tree.add_command(ModerationCommandGroup(self))
 
         if ENV == "dev":
