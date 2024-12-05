@@ -1,0 +1,11 @@
+services:
+  scorvbot:
+    build: .
+    container_name: "scorvbot-container"
+  redis:
+    image: "redis:alpine"
+    container_name: "scorvbot-redis-container"
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/data/:/data

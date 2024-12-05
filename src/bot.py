@@ -1,6 +1,7 @@
 import os
 
 import discord
+import redis.asyncio as redis
 from discord.ext import commands
 from discord.flags import Intents
 from dotenv import load_dotenv
@@ -23,6 +24,8 @@ PRIMARY_GUILD_ID = os.getenv("PRIMARY_GUILD")
 PRIMARY_GUILD = discord.Object(id=PRIMARY_GUILD_ID)
 TOKEN = os.getenv("DISCORD_TOKEN")
 ENV = os.getenv("ENV")
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
 
 
 class ScorvBot(commands.Bot):
@@ -30,6 +33,10 @@ class ScorvBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents, activity=activity)
 
     async def setup_hook(self):
+        redis_client = redis.Redis(
+            host=REDIS_HOST, port=REDIS_PORT, decode_responses=True
+        )
+
         # Add command cogs here
         await self.add_cog(Events(self))
         await self.add_cog(MiscCommandCog(self))
@@ -38,7 +45,7 @@ class ScorvBot(commands.Bot):
         # Add application command groups here
         self.tree.add_command(AnnouncementCommandGroup(self))
         self.tree.add_command(AssignRoleCommandGroup(self))
-        self.tree.add_command(TagSystemGroup(self))
+        self.tree.add_command(TagSystemGroup(self, redis_client))
         self.tree.add_command(GraphRoleCommandGroup(self))
         self.tree.add_command(RaffleCommandGroup(self))
         self.tree.add_command(ModerationCommandGroup(self))

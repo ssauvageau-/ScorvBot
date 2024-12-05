@@ -1,19 +1,22 @@
 import base64
-import copy
 import os
 import json
 from typing import Dict, List
 
 import discord
+import redis.asyncio as redis
 from discord.ui import Button
 from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
 
+REDIS_TAGS_KEY_NAME = "tags"
+
+
 @app_commands.guild_only()
 class TagSystemGroup(app_commands.Group, name="tag"):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot, redis_client: redis.Redis):
         load_dotenv()
         self.tag_json_path = os.getenv("TAG_JSON_PATH")
         try:
@@ -27,6 +30,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
             os.close(os.open(self.tag_json_path, os.O_CREAT))
         self.approval_channel = os.getenv("TAG_APPROVAL_ID")
         self.bot = bot
+        self.redis_client = redis_client
         super().__init__()
 
     def load_tags(self) -> Dict[str, Dict]:
@@ -46,7 +50,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
     async def tag_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> List[app_commands.Choice[str]]:
-        choices = [*self.tag_dict]
+        choices = await self.redis_client.hgetall(REDIS_TAGS_KEY_NAME)
         tags = [
             app_commands.Choice(name=choice, value=choice)
             for choice in choices
@@ -61,8 +65,9 @@ class TagSystemGroup(app_commands.Group, name="tag"):
     @app_commands.command(name="post", description="Post a tag in chat.")
     @app_commands.autocomplete(choice=tag_autocomplete)
     async def post_tag(self, interaction: discord.Interaction, choice: str):
-        data = self.tag_dict[choice]["data"]
-        decoded_data = self.decode_tag_data(data)
+        raw_tag = await self.redis_client.hget(name=REDIS_TAGS_KEY_NAME, key=choice)
+        tag = json.loads(raw_tag)
+        decoded_data = self.decode_tag_data(tag["data"])
         await interaction.response.send_message(decoded_data)
 
     @app_commands.command(name="submit", description="Submit a new tag for review.")
@@ -71,7 +76,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
     ):
         tag_clean = tag.strip()
         content_clean = content.strip()
-        if tag_clean in self.tag_dict:
+        if await self.redis_client.hexists(REDIS_TAGS_KEY_NAME, tag_clean):
             await interaction.response.send_message(
                 f"Tag `{tag_clean}` already exists!", ephemeral=True
             )
@@ -94,12 +99,8 @@ class TagSystemGroup(app_commands.Group, name="tag"):
     async def remove_tag(self, interaction: discord.Interaction, tag: str):
         # TODO - Extract deletion to confirmation dialog buttons?
         tag_clean = tag.strip()
-        if tag_clean in self.tag_dict:
-            # Deep clone in place so as not to interfere with other async funcs that may be reading dict at time
-            clone = copy.deepcopy(self.tag_dict)
-            del clone[tag_clean]
-            self.tag_dict = clone
-            self.dump_tags()
+        if await self.redis_client.hexists(REDIS_TAGS_KEY_NAME, tag_clean):
+            await self.redis_client.hdel(REDIS_TAGS_KEY_NAME, tag_clean)
             await interaction.response.send_message(
                 "Tag successfully removed.", ephemeral=True
             )
@@ -117,7 +118,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
             raise error
 
     async def create_approval_buttons(
-        self, submission: discord.Interaction, tag: str, data: str
+        self, submission: discord.Interaction, tag_name: str, data: str
     ):
         buttons = discord.ui.View(timeout=None)
         approval_button = Button(
@@ -132,18 +133,20 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         async def approval_callback(interaction: discord.Interaction):
             # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
             await submission.user.send(
-                f"Your tag: `{tag}` has been approved on the Grim Dawn server!"
+                f"Your tag: `{tag_name}` has been approved on the Grim Dawn server!"
             )
             await interaction.message.channel.send(
-                f"Tag `{tag}` approved by {interaction.user}."
+                f"Tag `{tag_name}` approved by {interaction.user}."
             )
             encoded_data = self.encode_tag_data(data)
-            self.tag_dict[tag] = {
+            tag = {
                 "data": encoded_data,
                 "author": interaction.user.name,
                 "creation": interaction.created_at.strftime("%a %d %b %Y, %I:%M%p %Z"),
             }
-            self.dump_tags()
+            await self.redis_client.hset(
+                name=REDIS_TAGS_KEY_NAME, key=tag_name, value=json.dumps(tag)
+            )
             await interaction.message.delete()
 
         approval_button.callback = approval_callback
@@ -160,10 +163,10 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         async def deny_callback(interaction: discord.Interaction):
             # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
             await submission.user.send(
-                f"Your tag: `{tag}` has been denied on the Grim Dawn server."
+                f"Your tag: `{tag_name}` has been denied on the Grim Dawn server."
             )
             await interaction.message.channel.send(
-                f"Tag `{tag}` denied by {interaction.user}."
+                f"Tag `{tag_name}` denied by {interaction.user}."
             )
             await interaction.message.delete()
 

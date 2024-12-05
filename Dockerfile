@@ -8,7 +8,7 @@ RUN apk --no-cache --virtual .build-deps add musl-dev linux-headers g++ jpeg-dev
 # Intsall discord.py linux voice dependencies
 RUN apk --no-cache add libffi python3-dev
 
-# Necessary manual package install for discord.py on Python 3.13
+# Necessary manual package install for discord.py
 RUN pip install --no-cache-dir libnacl
 
 # Install scorvbot python dependencies
