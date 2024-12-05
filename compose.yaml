@@ -1,11 +1,21 @@
 services:
   scorvbot:
     build: .
-    container_name: "scorvbot-container"
+    container_name: scorvbot-container
+    links:
+      - redis:${REDIS_HOST_NAME:-db}
+    volumes:
+      - ./${LOG_FOLDER:-logs}/:/scorvbot/${LOG_FOLDER:-logs}
+      - ./json/:/scorvbot/json # TODO: remove after redis migration
+    env_file:
+      - .env # Docker Compose is *supposed to* pick this up automagically, but it wasn't, so I needed to define it here
+    working_dir: /scorvbot
   redis:
-    image: "redis:alpine"
-    container_name: "scorvbot-redis-container"
+    image: redis:alpine
+    container_name: scorvbot-redis-container
     command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - ${REDIS_HOST_PORT:-6379}
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
       - ./redis/data/:/data

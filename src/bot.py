@@ -24,8 +24,8 @@ PRIMARY_GUILD_ID = os.getenv("PRIMARY_GUILD")
 PRIMARY_GUILD = discord.Object(id=PRIMARY_GUILD_ID)
 TOKEN = os.getenv("DISCORD_TOKEN")
 ENV = os.getenv("ENV")
-REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = os.getenv("REDIS_PORT")
+REDIS_HOST_NAME = os.getenv("REDIS_HOST_NAME", "redis")
+REDIS_HOST_PORT = os.getenv("REDIS_HOST_PORT", "6379")
 
 
 class ScorvBot(commands.Bot):
@@ -34,7 +34,7 @@ class ScorvBot(commands.Bot):
 
     async def setup_hook(self):
         redis_client = redis.Redis(
-            host=REDIS_HOST, port=REDIS_PORT, decode_responses=True
+            host=REDIS_HOST_NAME, port=REDIS_HOST_PORT, decode_responses=True
         )
 
         # Add command cogs here
