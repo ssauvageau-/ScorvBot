@@ -50,7 +50,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
     async def tag_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> List[app_commands.Choice[str]]:
-        choices = await self.redis_client.hgetall(REDIS_TAGS_KEY_NAME)
+        choices = await self.redis_client.hkeys(REDIS_TAGS_KEY_NAME)
         tags = [
             app_commands.Choice(name=choice, value=choice)
             for choice in choices
