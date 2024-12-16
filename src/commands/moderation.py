@@ -1,19 +1,13 @@
 import asyncio
 
 import aiohttp
-from datetime import datetime, timedelta, timezone
-import json
 import logging
-import os
-from typing import Dict
 
 import discord
-from discord import app_commands, http, TextStyle
+from discord import app_commands, http
 from discord.ext import commands
 from dotenv import load_dotenv
 import requests
-
-from utils import load_json_db, dump_json_db, log_utils
 
 COMMAND_ROLE_ALLOW_LIST = ["Admin", "Moderator", "Janitor"]
 

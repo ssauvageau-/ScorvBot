@@ -6,7 +6,6 @@ services:
       - redis:${REDIS_HOST_NAME:-db}
     volumes:
       - ./${LOG_FOLDER:-logs}/:/scorvbot/${LOG_FOLDER:-logs}
-      - ./json/:/scorvbot/json # TODO: remove after redis migration
     env_file:
       - .env
     working_dir: /scorvbot
