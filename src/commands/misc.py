@@ -1,6 +1,5 @@
 import os
-from typing import Dict, Optional
-import json
+from typing import Optional
 
 from PIL import Image, ImageSequence
 import discord
@@ -18,28 +17,8 @@ class MiscCommandCog(commands.Cog, name="Misc"):
         self.redis_client = redis_client
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
-
-        self.data_path = "json/data.json"
-        try:
-            self.data = self.load_data()
-        except json.decoder.JSONDecodeError:
-            self.data = {}
-        except FileNotFoundError:
-            self.data = {}
-            if not os.path.exists("json"):
-                os.makedirs("json")
-            os.close(os.open(self.data_path, os.O_CREAT))
-
         self.log_channel = "scorv-log"
         super().__init__()
-
-    def load_data(self) -> Dict[str, Dict]:
-        with open(self.data_path, "r", encoding="utf-8") as disk_lib:
-            return json.loads(disk_lib.read())
-
-    def dump_data(self) -> None:
-        with open(self.data_path, "w", encoding="utf-8") as disk_lib:
-            disk_lib.write(json.dumps(self.data, sort_keys=True))
 
     @app_commands.command(name="f", description="Pay respects. 'to' is optional.")
     async def pay_respects(
@@ -79,18 +58,6 @@ class MiscCommandCog(commands.Cog, name="Misc"):
             f"\n\nWorry not, the expansion will be made available **posthaste**!"
         )
         await self.redis_client.incr(delay_key)
-
-    @app_commands.command(
-        name="foa-meme-migrate", description="Migrate the FoA meme value to Redis"
-    )
-    @app_commands.checks.has_any_role("Admin")
-    async def expansion_meme_migrate(self, interaction: discord.Interaction):
-        amount = await self.redis_client.incr(
-            "foa_delay", amount=self.data.get("foa_delay")
-        )
-        await interaction.response.send_message(
-            f"Set FoA delay to {amount}", silent=True
-        )
 
     @app_commands.command(
         name="scorv-post", description="Send a text message as Scorv! Limited access!"

@@ -1,14 +1,11 @@
 import logging
-import json
 import os
 
 import discord
 from datetime import datetime, time, timezone
-from discord import app_commands, NotFound
+from discord import app_commands
 from discord.ext import tasks, commands
 from dotenv import load_dotenv
-
-from utils import load_json_db, dump_json_db
 
 utc = timezone.utc
 

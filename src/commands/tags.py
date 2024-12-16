@@ -1,7 +1,7 @@
 import base64
 import os
 import json
-from typing import Dict, List
+from typing import List
 
 import discord
 import redis.asyncio as redis
@@ -18,28 +18,10 @@ REDIS_TAGS_KEY_NAME = "tags"
 class TagSystemGroup(app_commands.Group, name="tag"):
     def __init__(self, bot: commands.Bot, redis_client: redis.Redis):
         load_dotenv()
-        self.tag_json_path = os.getenv("TAG_JSON_PATH")
-        try:
-            self.tag_dict = self.load_tags()
-        except json.decoder.JSONDecodeError:
-            self.tag_dict = {}
-        except FileNotFoundError:
-            self.tag_dict = {}
-            if not os.path.exists("json"):
-                os.makedirs("json")
-            os.close(os.open(self.tag_json_path, os.O_CREAT))
         self.approval_channel = os.getenv("TAG_APPROVAL_ID")
         self.bot = bot
         self.redis_client = redis_client
         super().__init__()
-
-    def load_tags(self) -> Dict[str, Dict]:
-        with open(self.tag_json_path, "r", encoding="utf-8") as disk_lib:
-            return json.loads(disk_lib.read())
-
-    def dump_tags(self) -> None:
-        with open(self.tag_json_path, "w", encoding="utf-8") as disk_lib:
-            disk_lib.write(json.dumps(self.tag_dict, sort_keys=True))
 
     def encode_tag_data(self, data: str) -> str:
         return base64.b64encode(data.encode("utf-8")).decode("utf-8")
@@ -104,21 +86,6 @@ class TagSystemGroup(app_commands.Group, name="tag"):
             await interaction.response.send_message(
                 "Tag successfully removed.", ephemeral=True
             )
-
-    @app_commands.command(
-        name="redis-migrate",
-        description="Migrate all existing tags from the json 'db' to Redis. WARNING - Don't run this twice!",
-    )
-    @app_commands.checks.has_any_role("Admin")
-    async def redis_migrate(self, interaction: discord.Interaction):
-        num_set = await self.redis_client.hset(
-            name=REDIS_TAGS_KEY_NAME,
-            mapping={k: json.dumps(v) for k, v in self.tag_dict.items()},
-        )
-        await interaction.response.send_message(
-            f"Inserted {num_set} tags(s) into the Redis!",
-            silent=True,
-        )
 
     @remove_tag.error
     async def remove_tag_error(
