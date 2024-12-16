@@ -9,6 +9,7 @@ services:
     env_file:
       - .env
     working_dir: /scorvbot
+    restart: always
   redis:
     image: redis:7.4-alpine
     container_name: scorvbot-redis-container
@@ -16,3 +17,4 @@ services:
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
       - ./redis/data/:/data
+    restart: always
