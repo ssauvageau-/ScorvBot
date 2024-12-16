@@ -1,122 +1,103 @@
-import base64
-import os
 import json
 from typing import Dict
 import datetime as dt
 import random
 
 import discord
+import redis.asyncio as redis
 from discord import app_commands
 from discord.ext import commands
-from dotenv import load_dotenv
+
+
+RAFFLE_CONFIG_KEY = "raffle_config"
+RAFFLE_SUBMISSIONS_KEY = "raffle_submissions"
 
 
 @app_commands.guild_only()
 class RaffleCommandGroup(app_commands.Group, name="raffle"):
-    def __init__(self, bot: commands.Bot):
-        load_dotenv()
+    def __init__(self, bot: commands.Bot, redis_client: redis.Redis):
         self.bot = bot
-        self.raffle_json_path = os.getenv("RAFFLE_JSON_PATH")
-        self.raffle_config = os.getenv("RAFFLE_CONFIG_NAME")
-        try:
-            self.raffle_dict = self.load_raffle()
-        except json.decoder.JSONDecodeError:
-            self.raffle_dict = {}
-        except FileNotFoundError:
-            self.raffle_dict = {}
-            if not os.path.exists("json"):
-                os.makedirs("json")
-            os.close(os.open(self.raffle_json_path, os.O_CREAT))
+        self.redis_client = redis_client
         super().__init__()
-
-    def load_raffle(self) -> Dict[str, Dict]:
-        with open(self.raffle_json_path, "r", encoding="utf-8") as disk_lib:
-            return json.loads(disk_lib.read())
-
-    def dump_raffle(self) -> None:
-        with open(self.raffle_json_path, "w", encoding="utf-8") as disk_lib:
-            disk_lib.write(json.dumps(self.raffle_dict, sort_keys=True))
-
-    # Don't really know how we'd want to use these
-    def encode_raffle_data(self, data: str) -> str:
-        return base64.b64encode(data.encode("utf-8")).decode("utf-8")
-
-    def decode_raffle_data(self, data: str) -> str:
-        return base64.b64decode(data.encode("utf-8")).decode("utf-8")
 
     @app_commands.command(
         name="count", description="Replies with the number of people in the raffle."
     )
     async def raffle_count(self, interaction: discord.Interaction):
-        if not self.raffle_dict:
+        if not await self.redis_client.exists(RAFFLE_CONFIG_KEY):
             await interaction.response.send_message(
                 "There is no currently-active raffle.", ephemeral=True
             )
             return
+        participant_count = await self.redis_client.hlen(RAFFLE_SUBMISSIONS_KEY)
         await interaction.response.send_message(
-            f"There are {len(self.raffle_dict) - 1} users in the raffle!\n"
-            f"This corresponds to having a {100.0/(len(self.raffle_dict) - 1)}% chance to win any prize!"
+            f"There are {participant_count} users in the raffle!\n"
+            f"This corresponds to having a {100.0/participant_count}% chance to win any prize!"
         )
 
     @app_commands.command(
         name="remove",
-        description="Remove a user from the current raffle based on their discord userid.",
+        description="Remove a user from the current raffle.",
     )
     @app_commands.checks.has_any_role("Admin", "Moderator")
-    async def raffle_remove(self, interaction: discord.Interaction, id: str):
-        for member in self.raffle_dict:
-            if member == self.raffle_config:
-                continue
-            if self.raffle_dict[member]["id"] == int(id):
-                del self.raffle_dict[member]
-                self.dump_raffle()
-                await interaction.response.send_message(
-                    f"Removed {member} from the raffle!"
-                )
-                return
-        await interaction.response.send_message("Userid not found in raffle.")
+    async def raffle_remove(self, interaction: discord.Interaction, user: discord.User):
+        was_removed = await self.redis_client.hdel(RAFFLE_SUBMISSIONS_KEY, user.name)
+        response = (
+            f"Removed {user.name} from the raffle!"
+            if was_removed > 0
+            else f"{user.name} not found in raffle."
+        )
+        await interaction.response.send_message(response)
 
     @app_commands.command(
         name="join", description="Join an upcoming raffle for fabulous prizes!"
     )
     async def join_raffle(self, interaction: discord.Interaction):
         member = interaction.user
-        if not self.raffle_dict:
+        if member.bot:
+            await interaction.response.send_message("No bots allowed!", ephemeral=True)
+        if not await self.redis_client.exists(RAFFLE_CONFIG_KEY):
             await interaction.response.send_message(
-                f"Sorry, {interaction.user.global_name}, but there does not appear to be an active raffle!",
+                f"Sorry, {interaction.user.mention}, but there does not appear to be an active raffle!",
                 ephemeral=True,
             )
             return
-        if member.name in self.raffle_dict:
-            self.raffle_dict[member.name]["submissions"] += 1
-            self.dump_raffle()
+        if await self.redis_client.hexists(RAFFLE_SUBMISSIONS_KEY, member.name):
+            raw_entry = await self.redis_client.hget(
+                RAFFLE_SUBMISSIONS_KEY, member.name
+            )
+            entry = json.loads(raw_entry)
+            entry["submissions"] += 1
+            await self.redis_client.hset(
+                RAFFLE_SUBMISSIONS_KEY, member.name, json.dumps(entry)
+            )
             await interaction.response.send_message(
                 "Your submission has been recorded!", ephemeral=True
             )
             return
+        raffle_config = await self.redis_client.hgetall(RAFFLE_CONFIG_KEY)
         currtime = dt.datetime.now(tz=dt.timezone.utc)
         diff = currtime - member.joined_at
         diff_s = diff.total_seconds()
         days = divmod(diff_s, 86400)  # 86400 seconds in a day
-        if days[0] < int(self.raffle_dict[self.raffle_config]["age"]):
+        if days[0] < int(raffle_config["age"]):
             await interaction.response.send_message(
                 f"Sorry, {interaction.user.global_name}, but your Discord account is not old enough to enter this raffle!"
             )
-            self.raffle_dict[self.raffle_config]["youth"] += 1
-            self.dump_raffle()
+            await self.redis_client.hincrby(RAFFLE_CONFIG_KEY, "youth", 1)
             return
-        if member.bot:
-            await interaction.response.send_message("No bots allowed!", ephemeral=True)
         # OTHERWISE
-        self.raffle_dict[member.name] = {
+        entry = {
             "id": member.id,
             "submissions": 1,
             "entry": str(currtime),
             "hasWon": False,
         }
-        self.dump_raffle()
+        await self.redis_client.hset(
+            RAFFLE_SUBMISSIONS_KEY, member.name, json.dumps(entry)
+        )
         await interaction.response.send_message(
-            f"{interaction.user.global_name}, you have entered yourself into the {self.raffle_dict[self.raffle_config]['name']} raffle! Good luck!",
+            f"{interaction.user.global_name}, you have entered yourself into the {raffle_config['name']} raffle! Good luck!",
             ephemeral=True,
         )
 
@@ -126,34 +107,38 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
         self,
         interaction: discord.Interaction,
         account_age: str,
-        allow_multiple_wins: str,
+        allow_multiple_wins: bool,
         name: str,
     ):
-        if self.raffle_dict:
+        if await self.redis_client.exists(RAFFLE_CONFIG_KEY):
             await interaction.response.send_message(
                 f"Sorry, {interaction.user}, a raffle is already ongoing!"
             )
             return
-        self.raffle_dict[self.raffle_config] = {
+        raffle_config = {
             "age": account_age,
             "name": name,
-            "multiple": allow_multiple_wins.lower() in ("true", "yes", "1", "y", "t"),
+            "multiple": int(allow_multiple_wins),
             "youth": 0,
         }
-        self.dump_raffle()
+        await self.redis_client.hset(RAFFLE_CONFIG_KEY, mapping=raffle_config)
         await interaction.response.send_message(f"Raffle {name} created.")
 
     @app_commands.command(name="close", description="Close an active raffle.")
     @app_commands.checks.has_any_role("Admin", "Moderator")
     async def close_raffle(self, interaction: discord.Interaction):
         # Don't need to bother checking if there is a raffle...
-        self.raffle_dict = {}
-        self.dump_raffle()
+        await self.redis_client.delete(RAFFLE_CONFIG_KEY, RAFFLE_SUBMISSIONS_KEY)
         await interaction.response.send_message("Raffle closed successfully.")
 
     @app_commands.command(name="pull", description="Pull a winner from the raffle!")
     @app_commands.checks.has_any_role("Admin", "Moderator")
     async def pull_raffle(self, interaction: discord.Interaction, count: str = "1"):
+        if not await self.redis_client.exists(RAFFLE_CONFIG_KEY):
+            await interaction.response.send_message(
+                "There is no currently-active raffle.", ephemeral=True
+            )
+            return
         responses = [
             "You have won a FABULOUS prize!\n",
             "You have been arbitrarily selected to receive stuff and things!\n",
@@ -165,31 +150,41 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
         This will keep the while loop going on subsequent pulls.
         If we don't care, we'll never set their win-tracker to True, and therefore the if statement in the while loop will never trigger.
         """
+        raffle_config = await self.redis_client.hgetall(RAFFLE_CONFIG_KEY)
         winners = []
-        for winner in range(min(int(count), len(self.raffle_dict) - 1)):
+        participant_count = await self.redis_client.hlen(RAFFLE_SUBMISSIONS_KEY)
+        for winner in range(min(int(count), participant_count)):
+            raffle_submissions = await self.redis_client.hgetall(RAFFLE_SUBMISSIONS_KEY)
             lucky = False
+            lucky_entry = {}
             while not lucky:
-                lucky = random.choice(list(self.raffle_dict.keys()))
-                if lucky == self.raffle_config:
-                    lucky = ""
-                    continue
-                if self.raffle_dict[lucky]["hasWon"]:
+                lucky = random.choice(list(raffle_submissions.keys()))
+                lucky_entry = json.loads(raffle_submissions[lucky])
+                if lucky_entry["hasWon"]:
                     lucky = False
             winners.append(
-                f"<@{self.raffle_dict[lucky]['id']}>, congratulations! {random.choice(responses)} A moderator will contact you shortly with information about your reward."
+                f"<@{lucky_entry['id']}>, congratulations! {random.choice(responses)} A moderator will contact you shortly with information about your reward."
             )
-            if not self.raffle_dict[self.raffle_config]["multiple"]:
-                self.raffle_dict[lucky]["hasWon"] = True
-                self.dump_raffle()
+            if not raffle_config["multiple"]:
+                lucky_entry["hasWon"] = True
+                await self.redis_client.hset(
+                    RAFFLE_SUBMISSIONS_KEY, lucky, json.dumps(lucky_entry)
+                )
         await interaction.response.send_message("\n\n".join(winners))
         return
 
     @app_commands.command(name="meme", description="Haha funny")
     @app_commands.checks.has_any_role("Admin", "Moderator")
     async def meme_embed(self, interaction: discord.Interaction):
-        await interaction.response.send_message(embed=self.create_embed(interaction))
+        if await self.redis_client.exists(RAFFLE_CONFIG_KEY):
+            meme_embed = await self.create_embed(interaction)
+            await interaction.response.send_message(embed=meme_embed)
+        else:
+            await interaction.response.send_message(
+                "There is no currently-active raffle.", ephemeral=True
+            )
 
-    def create_embed(self, interaction: discord.Interaction):
+    async def create_embed(self, interaction: discord.Interaction):
         raffle_embed = discord.Embed(
             title="Important Raffle Statistics", type="rich", color=0x00FFFF
         )
@@ -198,14 +193,14 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
         )
         spamCount = 0
         highest = (0, "")
-        for entry in self.raffle_dict:
-            if entry == self.raffle_config:
-                continue
-            subCount = self.raffle_dict[entry]["submissions"]
+        raffle_submissions = await self.redis_client.hgetall(RAFFLE_SUBMISSIONS_KEY)
+        for user, raw_entry in raffle_submissions.items():
+            entry = json.loads(raw_entry)
+            subCount = entry["submissions"]
             if subCount > 1:
                 spamCount += 1
                 if subCount > highest[0]:
-                    highest = (subCount, entry)
+                    highest = (subCount, user)
         raffle_embed.add_field(
             name="People that tried to abuse the system:", value=spamCount, inline=False
         )
@@ -215,9 +210,10 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
                 value=f"{highest[1]} at {highest[0]} extraneous resubmissions.",
                 inline=False,
             )
+        raffle_config = await self.redis_client.hgetall(RAFFLE_CONFIG_KEY)
         raffle_embed.add_field(
             name="Attempted Underage Gamblers:",
-            value=self.raffle_dict[self.raffle_config]["youth"],
+            value=raffle_config["youth"],
         )
 
         return raffle_embed

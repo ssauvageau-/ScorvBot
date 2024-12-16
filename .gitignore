@@ -11,3 +11,6 @@ __pycache__/
 json/
 .envrc
 logs/
+*.rdb
+*.aof
+*.aof.manifest

@@ -4,6 +4,7 @@ import json
 
 from PIL import Image, ImageSequence
 import discord
+import redis.asyncio as redis
 from discord import app_commands
 from discord.ext import commands
 
@@ -12,8 +13,9 @@ from utils import log_utils, Sunder
 
 @app_commands.guild_only()
 class MiscCommandCog(commands.Cog, name="Misc"):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot, redis_client: redis.Redis):
         self.bot = bot
+        self.redis_client = redis_client
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
 
@@ -60,7 +62,8 @@ class MiscCommandCog(commands.Cog, name="Misc"):
     async def expansion_meme(
         self, interaction: discord.Interaction, user: discord.User
     ):
-        num = self.data.get("foa_delay")
+        delay_key = "foa_delay"
+        num = await self.redis_client.get(delay_key)
         if num is None:
             num = 0
         else:
@@ -75,8 +78,19 @@ class MiscCommandCog(commands.Cog, name="Misc"):
             f"\n\n\tCurrent Delay: {num + 1} {day_term}"
             f"\n\nWorry not, the expansion will be made available **posthaste**!"
         )
-        self.data["foa_delay"] = num + 1
-        self.dump_data()
+        await self.redis_client.incr(delay_key)
+
+    @app_commands.command(
+        name="foa-meme-migrate", description="Migrate the FoA meme value to Redis"
+    )
+    @app_commands.checks.has_any_role("Admin")
+    async def expansion_meme_migrate(self, interaction: discord.Interaction):
+        amount = await self.redis_client.incr(
+            "foa_delay", amount=self.data.get("foa_delay")
+        )
+        await interaction.response.send_message(
+            f"Set FoA delay to {amount}", silent=True
+        )
 
     @app_commands.command(
         name="scorv-post", description="Send a text message as Scorv! Limited access!"
