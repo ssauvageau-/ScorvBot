@@ -40,7 +40,8 @@ class ScorvBot(commands.Bot):
             await redis_client.ping()
         except Exception as e:
             print("Could not connect to Redis:", e)
-            exit(1)
+            if ENV == "prod":
+                exit(1)
 
         # Add command cogs here
         await self.add_cog(Events(self))
