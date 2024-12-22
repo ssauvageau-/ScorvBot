@@ -7,6 +7,7 @@ from discord.flags import Intents
 from dotenv import load_dotenv
 
 from logging_config import setup_logging
+from config import ConfigCommandGroup, ConfigEventsCog
 from commands.announcements import AnnouncementCommandGroup
 from commands.assign_role import AssignRoleCommandGroup
 from commands.graph_roles import GraphRoleCommandGroup
@@ -18,10 +19,6 @@ from commands.moderation import ModerationCommandGroup
 from events import Events
 
 load_dotenv()
-TEST_GUILD_ID = os.getenv("TEST_GUILD")
-TEST_GUILD = discord.Object(id=TEST_GUILD_ID)
-PRIMARY_GUILD_ID = os.getenv("PRIMARY_GUILD")
-PRIMARY_GUILD = discord.Object(id=PRIMARY_GUILD_ID)
 TOKEN = os.getenv("DISCORD_TOKEN")
 ENV = os.getenv("ENV")
 REDIS_HOST_NAME = os.getenv("REDIS_HOST_NAME", "redis")
@@ -44,11 +41,13 @@ class ScorvBot(commands.Bot):
                 exit(1)
 
         # Add command cogs here
+        await self.add_cog(ConfigEventsCog(self, redis_client))
         await self.add_cog(Events(self))
         await self.add_cog(MiscCommandCog(self, redis_client))
         await self.add_cog(TaskCog(self))
 
         # Add application command groups here
+        self.tree.add_command(ConfigCommandGroup(self, redis_client))
         self.tree.add_command(AnnouncementCommandGroup(self))
         self.tree.add_command(AssignRoleCommandGroup(self))
         self.tree.add_command(TagSystemGroup(self, redis_client))
@@ -57,11 +56,12 @@ class ScorvBot(commands.Bot):
         self.tree.add_command(ModerationCommandGroup(self))
 
         if ENV == "dev":
-            self.tree.copy_global_to(guild=TEST_GUILD)
-            await self.tree.sync(guild=TEST_GUILD)
+            test_guild_id = os.getenv("TEST_GUILD")
+            test_guild = discord.Object(id=test_guild_id)
+            self.tree.copy_global_to(guild=test_guild)
+            await self.tree.sync(guild=test_guild)
         elif ENV == "prod":
-            self.tree.copy_global_to(guild=PRIMARY_GUILD)
-            await self.tree.sync(guild=PRIMARY_GUILD)
+            await self.tree.sync()
 
 
 logging_handler = setup_logging()
