@@ -123,50 +123,27 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             f"Deleted {len(deletions)} messages.", ephemeral=True
         )
 
-    async def channel_autocomplete(
-        self, interaction: discord.Interaction, current: str
-    ) -> List[app_commands.Choice[str]]:
-        choices = interaction.guild.text_channels
-        channels = [
-            app_commands.Choice(name=choice.name, value=choice.name)
-            for choice in choices
-            if current.lower() in choice.name.lower()
-        ]
-        if len(channels) > 25:
-            return channels[:25]
-        return channels
-
     @app_commands.command(
         name="get-channel-pos",
-        description="The position in the channel list. This is a number that starts at 0. e.g. the top channel is position 0.",
+        description="The position in the channel list. This is a number that starts at 0.",
     )
-    @app_commands.autocomplete(chan=channel_autocomplete)
     @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
-    async def get_channel_position(self, interaction: discord.Interaction, chan: str):
-        channel: discord.TextChannel
-        for ch in interaction.guild.text_channels:
-            if ch.name == chan:
-                channel = ch
-                break
+    async def get_channel_position(
+        self, interaction: discord.Interaction, channel: discord.TextChannel
+    ):
         await interaction.response.send_message(
-            f"{channel.name} is in position {channel.position}"
+            f"{channel.jump_url} is in position {channel.position}", ephemeral=True
         )
 
     @app_commands.command(
         name="move-channel",
         description="Moves a channel into the specific position. Recommend using the get-channel-pos command first.",
     )
-    @app_commands.autocomplete(chan=channel_autocomplete)
     @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
     async def move_channel(
-        self, interaction: discord.Interaction, chan: str, position: int
+        self, interaction: discord.Interaction, channel: discord.TextChannel, pos: int
     ):
-        channel: discord.TextChannel
-        for ch in interaction.guild.text_channels:
-            if ch.name == chan:
-                channel = ch
-                break
-        await channel.edit(position=position)
+        await channel.edit(position=pos)
         await interaction.response.send_message(
-            f"{channel.name} moved to position {position}"
+            f"{channel.jump_url} moved to position {pos}", ephemeral=True
         )
