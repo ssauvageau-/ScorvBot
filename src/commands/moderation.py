@@ -1,4 +1,5 @@
 import asyncio
+from typing import List
 
 import aiohttp
 import logging
@@ -120,4 +121,29 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             await asyncio.sleep(1)
         await interaction.followup.send(
             f"Deleted {len(deletions)} messages.", ephemeral=True
+        )
+
+    @app_commands.command(
+        name="get-channel-pos",
+        description="The position in the channel list. This is a number that starts at 0.",
+    )
+    @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
+    async def get_channel_position(
+        self, interaction: discord.Interaction, channel: discord.TextChannel
+    ):
+        await interaction.response.send_message(
+            f"{channel.jump_url} is in position {channel.position}", ephemeral=True
+        )
+
+    @app_commands.command(
+        name="move-channel",
+        description="Moves a channel into the specific position. Recommend using the get-channel-pos command first.",
+    )
+    @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
+    async def move_channel(
+        self, interaction: discord.Interaction, channel: discord.TextChannel, pos: int
+    ):
+        await channel.edit(position=pos)
+        await interaction.response.send_message(
+            f"{channel.jump_url} moved to position {pos}", ephemeral=True
         )
