@@ -29,6 +29,7 @@ class GraphRoleCommandGroup(app_commands.Group, name="graph-roles"):
             "Inquisitor",
             "Necromancer",
             "Oathkeeper",
+            "Berserker",
         ]
         pruned_roles = [role for role in role_list if role.name in masteries]
         pruned_roles.reverse()

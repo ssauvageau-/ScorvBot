@@ -23,6 +23,7 @@ class AssignRoleCommandGroup(app_commands.Group, name="assign-role"):
             "Inquisitor",
             "Necromancer",
             "Oathkeeper",
+            "Berserker",
         )
         self.PingRoles = ("Game News Pings", "Server News Pings")
         super().__init__()
