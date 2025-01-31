@@ -14,3 +14,4 @@ logs/
 *.rdb
 *.aof
 *.aof.manifest
+redis/data/

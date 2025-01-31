@@ -6,4 +6,4 @@ class RedisKeys(Enum):
     RAFFLE_CFG = "raffle_config"
     RAFFLE_SUB = "raffle_submissions"
     DELAY = "foa_delay"
-    ...
+    GUILD_CONFIG = "guild_config"

@@ -7,11 +7,11 @@ import redis.asyncio as redis
 from discord import app_commands
 from discord.ext import commands
 
-from enums import redis_keys as rk
+from enums import RedisKeys
 
 
-RAFFLE_CONFIG_KEY = rk.RedisKeys.RAFFLE_CFG.value
-RAFFLE_SUBMISSIONS_KEY = rk.RedisKeys.RAFFLE_SUB.value
+RAFFLE_CONFIG_KEY = RedisKeys.RAFFLE_CFG.value
+RAFFLE_SUBMISSIONS_KEY = RedisKeys.RAFFLE_SUB.value
 
 
 @app_commands.guild_only()

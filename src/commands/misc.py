@@ -8,9 +8,9 @@ from discord import app_commands
 from discord.ext import commands
 
 from utils import log_utils, Sunder
-from enums import redis_keys as rk
+from enums import RedisKeys
 
-delay_key = rk.RedisKeys.DELAY
+DELAY_KEY = RedisKeys.DELAY.value
 
 
 @app_commands.guild_only()
@@ -44,7 +44,7 @@ class MiscCommandCog(commands.Cog, name="Misc"):
     async def expansion_meme(
         self, interaction: discord.Interaction, user: discord.User
     ):
-        num = await self.redis_client.get(delay_key.value)
+        num = await self.redis_client.get(DELAY_KEY)
         if num is None:
             num = 0
         else:
@@ -59,7 +59,7 @@ class MiscCommandCog(commands.Cog, name="Misc"):
             f"\n\n\tCurrent Delay: {num + 1} {day_term}"
             f"\n\nWorry not, the expansion will be made available **posthaste**!"
         )
-        await self.redis_client.incr(delay_key.value)
+        await self.redis_client.incr(DELAY_KEY)
 
     @app_commands.command(
         name="scorv-post", description="Send a text message as Scorv! Limited access!"

@@ -10,10 +10,10 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from enums import redis_keys as rk
+from enums import RedisKeys
 
 
-REDIS_TAGS_KEY_NAME = rk.RedisKeys.TAGS.value
+REDIS_TAGS_KEY_NAME = RedisKeys.TAGS.value
 
 
 @app_commands.guild_only()
