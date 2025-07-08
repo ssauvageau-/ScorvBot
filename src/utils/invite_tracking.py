@@ -32,8 +32,7 @@ class InviteTracker(commands.Cog, name="invites"):
             lambda guild: str(guild.id) == self.guild_id, self.bot.guilds
         )
 
-    async def init_invites(self):
-        invs = await self.gld.invites()
+    async def init_invites(self, invs):
         prior_load = await self.redis_client.hgetall(name=REDIS_INVITES)
 
         for inv in invs:
@@ -57,9 +56,9 @@ class InviteTracker(commands.Cog, name="invites"):
     @commands.Cog.listener(name="on_member_join")
     async def update_invites(self, member: discord.Member):
         post_join_invs = await self.gld.invites()
-        pre_join_invs = self.redis_client.hgetall(name=REDIS_INVITES)
+        pre_join_invs = await self.redis_client.hgetall(name=REDIS_INVITES)
         if not pre_join_invs:
-            await self.init_invites()
+            await self.init_invites(post_join_invs)
             return
         for inv, values in pre_join_invs.items():
             # list comprehension to make code concise, should only be one item ([0])
@@ -95,7 +94,7 @@ class InviteTracker(commands.Cog, name="invites"):
         )
         if log_channel is None:
             raise Exception("Log channel not found")
-        invites = self.redis_client.hgetall(name=REDIS_INVITES)
+        invites = await self.redis_client.hgetall(name=REDIS_INVITES)
         use_exception_limit = 150  # ignore invites that reach this limit; ultra-popular ones are well-established
         caught_invites = []
         for code, values in invites:
