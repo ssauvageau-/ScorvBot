@@ -57,15 +57,8 @@ class InviteTracker(commands.Cog, name="invites"):
             lambda guild: str(guild.id) == self.guild_id, self.bot.guilds
         )
         post_join_invs = await gld.invites()
-        try:
-            # I don't know whether redis.hgetall throws an Exception if it cannot find the db in question
-            # I think it doesn't and would just return an empty dict
-            # But better safe than sorry, you know?
-            pre_join_invs = self.redis_client.hgetall(name=REDIS_INVITES)
-            if not pre_join_invs:
-                await self.init_invites()
-                return
-        except:
+        pre_join_invs = self.redis_client.hgetall(name=REDIS_INVITES)
+        if not pre_join_invs:
             await self.init_invites()
             return
         for inv, values in pre_join_invs.items():
