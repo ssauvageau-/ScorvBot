@@ -28,16 +28,16 @@ class InviteTracker(commands.Cog, name="invites"):
         )
         self.redis_client = redis_client
         self.log_channel_name = "scorv-log"
-
-    async def init_invites(self):
-        gld = discord.utils.find(
+        self.gld = discord.utils.find(
             lambda guild: str(guild.id) == self.guild_id, self.bot.guilds
         )
-        invs = await gld.invites()
+
+    async def init_invites(self):
+        invs = await self.gld.invites()
         prior_load = await self.redis_client.hgetall(name=REDIS_INVITES)
 
         for inv in invs:
-            sid = str(inv.id)
+            sid = inv.code
             if sid in prior_load:
                 jval = json.loads(prior_load[sid])
                 if inv.uses == jval[0]:
@@ -46,47 +46,78 @@ class InviteTracker(commands.Cog, name="invites"):
                     name=REDIS_INVITES, key=sid, value=json.dumps(jval)
                 )
             else:
+                inviter_id = inv.inviter.id if inv.inviter else 0
                 await self.redis_client.hset(
-                    name=REDIS_INVITES, key=sid, value=json.dumps([inv.uses, []])
+                    name=REDIS_INVITES,
+                    key=sid,
+                    value=json.dumps([inv.uses, [], inviter_id])
+                    # [number of times invite was used, tracked users who used the invite, ID of invite creator]
                 )
-                # [number of times invite was used, tracked users who used the invite]
 
     @commands.Cog.listener(name="on_member_join")
     async def update_invites(self, member: discord.Member):
-        gld = discord.utils.find(
-            lambda guild: str(guild.id) == self.guild_id, self.bot.guilds
-        )
-        post_join_invs = await gld.invites()
+        post_join_invs = await self.gld.invites()
         pre_join_invs = self.redis_client.hgetall(name=REDIS_INVITES)
         if not pre_join_invs:
             await self.init_invites()
             return
         for inv, values in pre_join_invs.items():
             # list comprehension to make code concise, should only be one item ([0])
-            hits = [x for x in post_join_invs if str(x.id) == inv]
-            jval = json.loads(values)
-            if hits and hits[0].uses > jval[0]:
-                users = jval[1].append(member.id)
+            hits = [x for x in post_join_invs if x.code == inv]
+            jvals = json.loads(values)
+            if hits and hits[0].uses > jvals[0]:
+                users = jvals[1].append(member.id)
                 await self.redis_client.hset(
                     name=REDIS_INVITES,
-                    key=str(hits[0].id),
-                    value=json.dumps([jval[0] + 1, users]),
+                    key=hits[0].code,
+                    value=json.dumps([jvals[0] + 1, users, jvals[2]]),
                 )
                 self.logger.info(f"Added {member.id} to Invite Roster of Invite {inv}")
 
     @commands.Cog.listener(name="on_invite_create")
     async def new_invite(self, invite: discord.Invite):
+        inviter_id = invite.inviter.id if invite.inviter else 0
         await self.redis_client.hset(
-            name=REDIS_INVITES, key=invite.id, value=json.dumps([0, []])
+            name=REDIS_INVITES, key=invite.code, value=json.dumps([0, [], inviter_id])
         )
-        self.logger.info(f"Added new Invite: {invite.id}")
+        self.logger.info(f"Added new Invite: {invite.code}")
 
-    @commands.Cog.listen(name="on_invite_deleted")
+    @commands.Cog.listener(name="on_invite_deleted")
     async def del_invite(self, invite: discord.Invite):
-        await self.redis_client.delete(str(invite.id))
-        self.logger.info(f"Deleted Invite: {invite.id}")
+        await self.redis_client.delete(invite.code)
+        self.logger.info(f"Deleted Invite: {invite.code}")
 
-    # TODO
     @commands.Cog.listener(name="on_member_ban")
-    async def log_ban(self):
-        ...
+    async def log_ban(self, member: discord.Member):
+        log_channel = discord.utils.find(
+            lambda channel: channel.name == self.log_channel_name,
+            self.gld.channels,
+        )
+        if log_channel is None:
+            raise Exception("Log channel not found")
+        invites = self.redis_client.hgetall(name=REDIS_INVITES)
+        use_exception_limit = 150  # ignore invites that reach this limit; ultra-popular ones are well-established
+        caught_invites = []
+        for code, values in invites:
+            jvals = json.loads(values)
+            if member.id in jvals[1]:
+                if jvals[0] >= use_exception_limit:
+                    return
+                if jvals[2] == 0:
+                    # no data to be gleamed :( - likely an older invite/Server Discovery, both of which are fine.
+                    return
+                caught_invites.append([code, jvals[2]])
+        embed = discord.Embed(
+            color=discord.Color.red(),
+            title=f"{member.name} has been banned!",
+            description=f"{member.global_name}",
+        )
+        embed.set_author(name=member.display_name, icon_url=member.display_avatar.url)
+        for i in range(len(caught_invites)):
+            embed.add_field(name="Used Invite", value=caught_invites[i][0], inline=True)
+            embed.add_field(
+                name="Invite Creator", value=caught_invites[i][1], inline=True
+            )
+            if i < len(caught_invites) - 1:
+                embed.add_field(name="\u200B", value="\u200B")  # newline
+        await log_channel.send(embed=embed)
