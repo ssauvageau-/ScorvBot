@@ -16,6 +16,7 @@ from commands.raffle import RaffleCommandGroup
 from commands.tasks import TaskCog
 from commands.moderation import ModerationCommandGroup
 from events import Events
+from utils.invite_tracking import InviteTracker
 
 load_dotenv()
 TEST_GUILD_ID = os.getenv("TEST_GUILD")
@@ -47,6 +48,7 @@ class ScorvBot(commands.Bot):
         await self.add_cog(Events(self))
         await self.add_cog(MiscCommandCog(self, redis_client))
         await self.add_cog(TaskCog(self))
+        await self.add_cog(InviteTracker(self, redis_client))
 
         # Add application command groups here
         self.tree.add_command(AnnouncementCommandGroup(self))
