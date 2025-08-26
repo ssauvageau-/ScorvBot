@@ -343,6 +343,10 @@ class Events(commands.Cog, name="Events"):
             if role.name in ["Admin", "Moderator"]:
                 return
 
+        if len(message.author.roles) > 1:
+            # does user have more than the @everyone role? "probably" not a bot
+            return
+
         log_channel = discord.utils.find(
             lambda channel: channel.name == self.log_channel_name,
             message.guild.channels,
@@ -350,45 +354,35 @@ class Events(commands.Cog, name="Events"):
         if log_channel is None:
             raise Exception("Log channel not found")
         cont = message.content.lower()
-        if (
-            "/1.jpg?" in cont
-            and "/2.jpg?" in cont
-            and "/3.jpg?" in cont
-            and "/4.jpg?" in cont
+        if cont.count("https://") == 4 and (
+            message.mention_everyone or "@everyone" in cont or "@here" in cont
         ):
-            if "&width=" in cont:
-                wdts = [int(x[0:4]) for x in cont.split("=&width=")[1:]]
-                hgts = [int(x[0:4]) for x in cont.split("&height=")[1:]]
-                if wdts[0] == sum(wdts) / len(wdts) and hgts[0] == sum(hgts) / len(
-                    hgts
-                ):
-                    # scam seems to use 4 images of identical dimensions
-                    log_embed = discord.Embed(
-                        color=discord.Color.red(),
-                        title="Scam Attempt Identified",
-                        description=message.author.mention,
-                        timestamp=message.created_at,
-                    )
-                    log_embed.set_author(
-                        name=message.author.display_name,
-                        icon_url=message.author.display_avatar.url,
-                    )
-                    log_embed.add_field(
-                        name="Channel", value=message.channel.jump_url, inline=True
-                    )
-                    log_embed.add_field(
-                        name="Message", value=message.content, inline=True
-                    )
+            # message.mention_everyone behavior not well-defined? difference between mention and raw text?
+            # scam seems to use 4 images of identical dimensions
+            log_embed = discord.Embed(
+                color=discord.Color.red(),
+                title="Scam Attempt Identified",
+                description=message.author.mention,
+                timestamp=message.created_at,
+            )
+            log_embed.set_author(
+                name=message.author.display_name,
+                icon_url=message.author.display_avatar.url,
+            )
+            log_embed.add_field(
+                name="Channel", value=message.channel.jump_url, inline=True
+            )
+            log_embed.add_field(name="Message", value=message.content, inline=True)
 
-                    await log_channel.send(embed=log_embed)
-                    self.logger.info(
-                        f"Scam attempt posted in {log_utils.format_channel_name(message.channel)} by {log_utils.format_user(message.author)}"
-                    )
-                    self.last_deleted = message.id
-                    await message.author.ban(
-                        delete_message_seconds=3600,
-                        reason="Malicious Scam Attempt posted",
-                    )
+            await log_channel.send(embed=log_embed)
+            self.logger.info(
+                f"Scam attempt posted in {log_utils.format_channel_name(message.channel)} by {log_utils.format_user(message.author)}"
+            )
+            self.last_deleted = message.id
+            await message.author.ban(
+                delete_message_seconds=3600,
+                reason="Malicious Scam Attempt posted",
+            )
 
     @commands.Cog.listener(name="on_message_delete")
     async def message_deleted(self, message: discord.Message):
