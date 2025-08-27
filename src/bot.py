@@ -45,7 +45,7 @@ class ScorvBot(commands.Bot):
                 exit(1)
 
         # Add command cogs here
-        await self.add_cog(Events(self))
+        await self.add_cog(Events(self, redis_client))
         await self.add_cog(MiscCommandCog(self, redis_client))
         await self.add_cog(TaskCog(self))
         await self.add_cog(InviteTracker(self, redis_client))

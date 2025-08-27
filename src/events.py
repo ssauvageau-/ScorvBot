@@ -1,8 +1,10 @@
+import hashlib
 import logging
 import random
 import re
 
 import discord
+import redis
 from discord import app_commands
 from discord.ext import commands
 from datetime import datetime, timezone
@@ -12,14 +14,30 @@ from utils import Sunder, log_utils
 utc = timezone.utc
 
 
+def general_logging(message: discord.Message, lc: str):
+    if message.author.bot:
+        return None
+    for role in message.author.roles:
+        if role.name in ["Admin", "Moderator"]:
+            return None
+    log_channel = discord.utils.find(
+        lambda channel: channel.name == lc,
+        message.guild.channels,
+    )
+    if log_channel is None:
+        raise Exception("Log channel not found")
+    return log_channel
+
+
 class Events(commands.Cog, name="Events"):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: commands.Bot, redis_client: redis.Redis) -> None:
         self.logger = logging.getLogger("bot")
         self.log_channel_name = "scorv-log"
         self.log_channel_name_alt = "scorv-log2"
         self.log_channel_name_md = "scorv-log-md"
         self.last_deleted = 0
         self.bot = bot
+        self.redis_client = redis_client
         self.timeline = {}
 
     @commands.Cog.listener(name="on_error")
@@ -214,15 +232,9 @@ class Events(commands.Cog, name="Events"):
 
     @commands.Cog.listener(name="on_message")
     async def masked_url_event(self, message: discord.Message):
-        if message.author.bot:
+        log_channel = general_logging(message, self.log_channel_name)
+        if not log_channel:
             return
-
-        log_channel = discord.utils.find(
-            lambda channel: channel.name == self.log_channel_name,
-            message.guild.channels,
-        )
-        if log_channel is None:
-            raise Exception("Log channel not found")
 
         masked_url_pattern = r"\[(?P<mask>.+)\]\((?P<url>.*)\)"
         for masked_url in re.finditer(masked_url_pattern, message.content):
@@ -277,19 +289,9 @@ class Events(commands.Cog, name="Events"):
 
     @commands.Cog.listener(name="on_message")
     async def discord_link_event(self, message: discord.Message):
-        if message.author.bot:
+        log_channel = general_logging(message, self.log_channel_name)
+        if not log_channel:
             return
-
-        for role in message.author.roles:
-            if role.name in ["Admin", "Moderator"]:
-                return
-
-        log_channel = discord.utils.find(
-            lambda channel: channel.name == self.log_channel_name,
-            message.guild.channels,
-        )
-        if log_channel is None:
-            raise Exception("Log channel not found")
 
         whitelist = [
             "8Dr8mge",  # Grim Dawn
@@ -334,31 +336,67 @@ class Events(commands.Cog, name="Events"):
             self.last_deleted = message.id
             await message.delete()
 
+    # @commands.Cog.listener(name="on_message")
+    # async def four_image_scam_event(self, message: discord.Message):
+    #     if message.author.bot:
+    #         return
+    #
+    #     for role in message.author.roles:
+    #         if role.name in ["Admin", "Moderator"]:
+    #             return
+    #
+    #     if len(message.author.roles) > 1:
+    #         # does user have more than the @everyone role? "probably" not a bot
+    #         return
+    #
+    #     log_channel = discord.utils.find(
+    #         lambda channel: channel.name == self.log_channel_name,
+    #         message.guild.channels,
+    #     )
+    #     if log_channel is None:
+    #         raise Exception("Log channel not found")
+    #     cont = message.content.lower()
+    #     if cont.count("https://") == 4 and (
+    #         message.mention_everyone or "@everyone" in cont or "@here" in cont
+    #     ):
+    #         # message.mention_everyone behavior not well-defined? difference between mention and raw text?
+    #         # scam seems to use 4 images of identical dimensions
+    #         log_embed = discord.Embed(
+    #             color=discord.Color.red(),
+    #             title="Scam Attempt Identified",
+    #             description=message.author.mention,
+    #             timestamp=message.created_at,
+    #         )
+    #         log_embed.set_author(
+    #             name=message.author.display_name,
+    #             icon_url=message.author.display_avatar.url,
+    #         )
+    #         log_embed.add_field(
+    #             name="Channel", value=message.channel.jump_url, inline=True
+    #         )
+    #         log_embed.add_field(name="Message", value=message.content, inline=True)
+    #
+    #         await log_channel.send(embed=log_embed)
+    #         self.logger.info(
+    #             f"Scam attempt posted in {log_utils.format_channel_name(message.channel)} by {log_utils.format_user(message.author)}"
+    #         )
+    #         self.last_deleted = message.id
+    #         await message.author.ban(
+    #             delete_message_seconds=3600,
+    #             reason="Malicious Scam Attempt posted",
+    #         )
+
     @commands.Cog.listener(name="on_message")
-    async def four_image_scam_event(self, message: discord.Message):
-        if message.author.bot:
+    async def general_scam_detection(self, message: discord.Message):
+        log_channel = general_logging(message, self.log_channel_name)
+        if not log_channel:
             return
-
-        for role in message.author.roles:
-            if role.name in ["Admin", "Moderator"]:
-                return
-
-        if len(message.author.roles) > 1:
-            # does user have more than the @everyone role? "probably" not a bot
-            return
-
-        log_channel = discord.utils.find(
-            lambda channel: channel.name == self.log_channel_name,
-            message.guild.channels,
-        )
-        if log_channel is None:
-            raise Exception("Log channel not found")
-        cont = message.content.lower()
-        if cont.count("https://") == 4 and (
-            message.mention_everyone or "@everyone" in cont or "@here" in cont
-        ):
-            # message.mention_everyone behavior not well-defined? difference between mention and raw text?
-            # scam seems to use 4 images of identical dimensions
+        h = hashlib.sha256(bytes(message.content, "utf-8")).hexdigest()
+        msg_key = message.author.name + h
+        val = await self.redis_client.hincrby("spam_detection", msg_key, 1)
+        if val == 1:
+            await self.redis_client.hexpireat("spam_detection", 5, msg_key)
+        elif val > 3:
             log_embed = discord.Embed(
                 color=discord.Color.red(),
                 title="Scam Attempt Identified",
