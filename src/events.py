@@ -29,12 +29,31 @@ def general_logging(message: discord.Message, lc: str):
     return log_channel
 
 
+def log_embed_builder(
+    color: discord.Color, warning: str, message: discord.Message
+) -> discord.Embed:
+    embed = discord.Embed(
+        color=color,
+        title=warning,
+        description=message.author.mention,
+        timestamp=message.created_at,
+    )
+    embed.set_author(
+        name=message.author.display_name,
+        icon_url=message.author.display_avatar.url,
+    )
+    embed.add_field(name="Message", value=message.content, inline=True)
+
+    return embed
+
+
 class Events(commands.Cog, name="Events"):
     def __init__(self, bot: commands.Bot, redis_client: redis.Redis) -> None:
         self.logger = logging.getLogger("bot")
         self.log_channel_name = "scorv-log"
         self.log_channel_name_alt = "scorv-log2"
         self.log_channel_name_md = "scorv-log-md"
+        self.honeypot_channel_name = "very-cool-channel"
         self.last_deleted = 0
         self.bot = bot
         self.redis_client = redis_client
@@ -361,22 +380,13 @@ class Events(commands.Cog, name="Events"):
     #     ):
     #         # message.mention_everyone behavior not well-defined? difference between mention and raw text?
     #         # scam seems to use 4 images of identical dimensions
-    #         log_embed = discord.Embed(
-    #             color=discord.Color.red(),
-    #             title="Scam Attempt Identified",
-    #             description=message.author.mention,
-    #             timestamp=message.created_at,
-    #         )
-    #         log_embed.set_author(
-    #             name=message.author.display_name,
-    #             icon_url=message.author.display_avatar.url,
-    #         )
+    #         log_embed = log_embed_builder(discord.Color.red(), "Scam Attempt Identified", message)
+    #
     #         log_embed.add_field(
     #             name="Channel", value=message.channel.jump_url, inline=True
-    #         )
-    #         log_embed.add_field(name="Message", value=message.content, inline=True)
+    #         }
     #
-    #         await log_channel.send(embed=log_embed)
+    #             await log_channel.send(embed=log_embed)
     #         self.logger.info(
     #             f"Scam attempt posted in {log_utils.format_channel_name(message.channel)} by {log_utils.format_user(message.author)}"
     #         )
@@ -397,20 +407,13 @@ class Events(commands.Cog, name="Events"):
         if val == 1:
             await self.redis_client.hexpireat("spam_detection", 5, msg_key)
         elif val > 3:
-            log_embed = discord.Embed(
-                color=discord.Color.red(),
-                title="Scam Attempt Identified",
-                description=message.author.mention,
-                timestamp=message.created_at,
+            log_embed = log_embed_builder(
+                discord.Color.red(), "Scam Attempt Identified", message
             )
-            log_embed.set_author(
-                name=message.author.display_name,
-                icon_url=message.author.display_avatar.url,
-            )
+
             log_embed.add_field(
                 name="Channel", value=message.channel.jump_url, inline=True
             )
-            log_embed.add_field(name="Message", value=message.content, inline=True)
 
             await log_channel.send(embed=log_embed)
             self.logger.info(
@@ -420,6 +423,35 @@ class Events(commands.Cog, name="Events"):
             await message.author.ban(
                 delete_message_seconds=3600,
                 reason="Malicious Scam Attempt posted",
+            )
+
+    @commands.Cog.listener(name="on_message")
+    async def honeypot_detection(self, message: discord.Message):
+        log_channel = general_logging(message, self.log_channel_name)
+        if not log_channel:
+            return
+        honey_channel = discord.utils.find(
+            lambda channel: channel.name == self.honeypot_channel_name,
+            message.guild.channels,
+        )
+        if message.author.bot:
+            return
+        for role in message.author.roles:
+            if role.name in ["Admin", "Moderator"]:
+                return
+        if message.channel == honey_channel:
+            await log_channel.send(
+                embed=log_embed_builder(
+                    discord.Color.red(), "Honeypot Post Caught", message
+                )
+            )
+            self.logger.info(
+                f"Honeypot Post Caught by {log_utils.format_user(message.author)}"
+            )
+            self.last_deleted = message.id
+            await message.author.ban(
+                delete_message_seconds=3600,
+                reason="Honeypot Message posted",
             )
 
     @commands.Cog.listener(name="on_message_delete")

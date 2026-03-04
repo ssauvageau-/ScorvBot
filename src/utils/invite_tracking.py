@@ -87,7 +87,7 @@ class InviteTracker(commands.Cog, name="invites"):
         self.logger.info(f"Deleted Invite: {invite.code}")
 
     @commands.Cog.listener(name="on_member_ban")
-    async def log_ban(self, member: discord.Member):
+    async def log_ban(self, guild, member: discord.Member):
         log_channel = discord.utils.find(
             lambda channel: channel.name == self.log_channel_name,
             self.gld.channels,
