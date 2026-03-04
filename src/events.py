@@ -405,7 +405,7 @@ class Events(commands.Cog, name="Events"):
         msg_key = message.author.name + h
         val = await self.redis_client.hincrby("spam_detection", msg_key, 1)
         if val == 1:
-            await self.redis_client.hexpireat("spam_detection", 5, msg_key)
+            await self.redis_client.hexpire("spam_detection", 5, msg_key)
         elif val > 3:
             log_embed = log_embed_builder(
                 discord.Color.red(), "Scam Attempt Identified", message
