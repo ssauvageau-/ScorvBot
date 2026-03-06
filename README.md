@@ -84,6 +84,7 @@ DISCORD_TOKEN='<Discord app token>'
 TEST_GUILD='<ID of your test server>'
 TAG_APPROVAL_ID='<ID of the #channel where tag approval messages will go>'
 ENV='dev'
+DOCKER_RESTART_POLICY='no' # This is so ScorvBot does not launch each time you start Docker Desktop
 ```
 
 Follow [this guide](https://discordpy.readthedocs.io/en/stable/discord.html) for setting up a Discord app and getting a token.

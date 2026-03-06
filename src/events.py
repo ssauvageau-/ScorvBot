@@ -1,7 +1,9 @@
+import asyncio
 import hashlib
 import logging
 import random
 import re
+
 
 import discord
 import redis
@@ -266,15 +268,19 @@ class Events(commands.Cog, name="Events"):
             dismiss = "dismiss message" in mask.lower()
 
             log_embed = discord.Embed(
-                color=discord.Color.red()
-                if (steam or dismiss)
-                else discord.Color.yellow(),
-                title="Steam URL Mask Detected & Deleted"
-                if steam
-                else (
-                    "Dismiss Message Scam Detected & Deleted"
-                    if dismiss
-                    else "Masked URL in message"
+                color=(
+                    discord.Color.red()
+                    if (steam or dismiss)
+                    else discord.Color.yellow()
+                ),
+                title=(
+                    "Steam URL Mask Detected & Deleted"
+                    if steam
+                    else (
+                        "Dismiss Message Scam Detected & Deleted"
+                        if dismiss
+                        else "Masked URL in message"
+                    )
                 ),
                 description=message.author.mention,
                 timestamp=message.created_at,
@@ -423,12 +429,18 @@ class Events(commands.Cog, name="Events"):
             log_embed.add_field(
                 name="Channel", value=message.channel.jump_url, inline=True
             )
-            await log_channel.send(embed=log_embed)
+            async with asyncio.TaskGroup() as tg:
+                self.logger.info("Sending log embed and banning scam author")
+                log_task = tg.create_task(log_channel.send(embed=log_embed))
+                ban_task = tg.create_task(
+                    message.author.ban(
+                        delete_message_seconds=3600,
+                        reason="Malicious Scam Attempt posted",
+                    )
+                )
             self.last_deleted = message.id
-            await message.author.ban(
-                delete_message_seconds=3600,
-                reason="Malicious Scam Attempt posted",
-            )
+
+            self.logger.info(f"Log embed task result: {log_task.result()}. Ban task result: {ban_task.result()}")
 
     @commands.Cog.listener(name="on_message")
     async def honeypot_detection(self, message: discord.Message):
