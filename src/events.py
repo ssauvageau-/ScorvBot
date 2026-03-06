@@ -413,6 +413,9 @@ class Events(commands.Cog, name="Events"):
         if val == 1:
             await self.redis_client.hexpire("spam_detection", 10, msg_key)
         elif val > 3:
+            self.logger.info(
+                f"Scam attempt posted in {log_utils.format_channel_name(message.channel)} by {log_utils.format_user(message.author)}"
+            )
             log_embed = log_embed_builder(
                 discord.Color.red(), "Scam Attempt Identified", message
             )
@@ -420,11 +423,7 @@ class Events(commands.Cog, name="Events"):
             log_embed.add_field(
                 name="Channel", value=message.channel.jump_url, inline=True
             )
-
             await log_channel.send(embed=log_embed)
-            self.logger.info(
-                f"Scam attempt posted in {log_utils.format_channel_name(message.channel)} by {log_utils.format_user(message.author)}"
-            )
             self.last_deleted = message.id
             await message.author.ban(
                 delete_message_seconds=3600,
@@ -448,13 +447,13 @@ class Events(commands.Cog, name="Events"):
             if role.name in ["Admin", "Moderator"]:
                 return
         if message.channel == honey_channel:
+            self.logger.info(
+                f"Honeypot Post Caught by {log_utils.format_user(message.author)}"
+            )
             await log_channel.send(
                 embed=log_embed_builder(
                     discord.Color.red(), "Honeypot Post Caught", message
                 )
-            )
-            self.logger.info(
-                f"Honeypot Post Caught by {log_utils.format_user(message.author)}"
             )
             self.last_deleted = message.id
             await message.author.ban(

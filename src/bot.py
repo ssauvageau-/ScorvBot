@@ -49,6 +49,10 @@ class ScorvBot(commands.Bot):
         await self.add_cog(MiscCommandCog(self, redis_client))
         await self.add_cog(TaskCog(self))
         # await self.add_cog(InviteTracker(self, redis_client))
+        try:
+            await self.remove_cog("invites")
+        except:
+            ...
 
         # Add application command groups here
         self.tree.add_command(AnnouncementCommandGroup(self))
