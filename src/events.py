@@ -15,17 +15,17 @@ utc = timezone.utc
 
 
 def general_logging(message: discord.Message, lc: str):
-    if message.author.bot:
-        return None
-    for role in message.author.roles:
-        if role.name in ["Admin", "Moderator"]:
-            return None
     log_channel = discord.utils.find(
         lambda channel: channel.name == lc,
         message.guild.channels,
     )
     if log_channel is None:
         raise Exception("Log channel not found")
+    if message.author.bot:
+        return -1
+    for role in message.author.roles:
+        if role.name in ["Admin", "Moderator"]:
+            return -1
     return log_channel
 
 
@@ -252,7 +252,9 @@ class Events(commands.Cog, name="Events"):
     @commands.Cog.listener(name="on_message")
     async def masked_url_event(self, message: discord.Message):
         log_channel = general_logging(message, self.log_channel_name)
-        if not log_channel:
+        if log_channel is None:
+            raise Exception("Log channel not found")
+        elif log_channel == -1:
             return
 
         masked_url_pattern = r"\[(?P<mask>.+)\]\((?P<url>.*)\)"
@@ -309,7 +311,9 @@ class Events(commands.Cog, name="Events"):
     @commands.Cog.listener(name="on_message")
     async def discord_link_event(self, message: discord.Message):
         log_channel = general_logging(message, self.log_channel_name)
-        if not log_channel:
+        if log_channel is None:
+            raise Exception("Log channel not found")
+        elif log_channel == -1:
             return
 
         whitelist = [
@@ -399,13 +403,15 @@ class Events(commands.Cog, name="Events"):
     @commands.Cog.listener(name="on_message")
     async def general_scam_detection(self, message: discord.Message):
         log_channel = general_logging(message, self.log_channel_name)
-        if not log_channel:
+        if log_channel is None:
+            raise Exception("Log channel not found")
+        elif log_channel == -1:
             return
         h = hashlib.sha256(bytes(message.content, "utf-8")).hexdigest()
         msg_key = message.author.name + h
         val = await self.redis_client.hincrby("spam_detection", msg_key, 1)
         if val == 1:
-            await self.redis_client.hexpire("spam_detection", 5, msg_key)
+            await self.redis_client.hexpire("spam_detection", 10, msg_key)
         elif val > 3:
             log_embed = log_embed_builder(
                 discord.Color.red(), "Scam Attempt Identified", message
@@ -428,7 +434,9 @@ class Events(commands.Cog, name="Events"):
     @commands.Cog.listener(name="on_message")
     async def honeypot_detection(self, message: discord.Message):
         log_channel = general_logging(message, self.log_channel_name)
-        if not log_channel:
+        if log_channel is None:
+            raise Exception("Log channel not found")
+        elif log_channel == -1:
             return
         honey_channel = discord.utils.find(
             lambda channel: channel.name == self.honeypot_channel_name,
