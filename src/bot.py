@@ -73,7 +73,7 @@ class ScorvBot(commands.Bot):
 logging_handler = setup_logging()
 
 bot_activity = discord.Activity(
-    type=discord.ActivityType.watching, name="for fresh meat!"
+    type=discord.ActivityType.custom, name="Watching for fresh meat!"
 )
 bot = ScorvBot(intents=discord.Intents.all(), activity=bot_activity)
 
