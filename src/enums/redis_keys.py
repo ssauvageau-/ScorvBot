@@ -7,3 +7,4 @@ class RedisKeys(Enum):
     RAFFLE_SUB = "raffle_submissions"
     DELAY = "foa_delay"
     INVITES = "invites"
+    HONEY = "honey"

@@ -12,8 +12,11 @@ from discord.ext import commands
 from datetime import datetime, timezone
 
 from utils import Sunder, log_utils
+from enums import redis_keys as rk
 
 utc = timezone.utc
+
+honey_key = rk.RedisKeys.DELAY
 
 
 def general_logging(message: discord.Message, lc: str):
@@ -365,47 +368,6 @@ class Events(commands.Cog, name="Events"):
             self.last_deleted = message.id
             await message.delete()
 
-    # @commands.Cog.listener(name="on_message")
-    # async def four_image_scam_event(self, message: discord.Message):
-    #     if message.author.bot:
-    #         return
-    #
-    #     for role in message.author.roles:
-    #         if role.name in ["Admin", "Moderator"]:
-    #             return
-    #
-    #     if len(message.author.roles) > 1:
-    #         # does user have more than the @everyone role? "probably" not a bot
-    #         return
-    #
-    #     log_channel = discord.utils.find(
-    #         lambda channel: channel.name == self.log_channel_name,
-    #         message.guild.channels,
-    #     )
-    #     if log_channel is None:
-    #         raise Exception("Log channel not found")
-    #     cont = message.content.lower()
-    #     if cont.count("https://") == 4 and (
-    #         message.mention_everyone or "@everyone" in cont or "@here" in cont
-    #     ):
-    #         # message.mention_everyone behavior not well-defined? difference between mention and raw text?
-    #         # scam seems to use 4 images of identical dimensions
-    #         log_embed = log_embed_builder(discord.Color.red(), "Scam Attempt Identified", message)
-    #
-    #         log_embed.add_field(
-    #             name="Channel", value=message.channel.jump_url, inline=True
-    #         }
-    #
-    #             await log_channel.send(embed=log_embed)
-    #         self.logger.info(
-    #             f"Scam attempt posted in {log_utils.format_channel_name(message.channel)} by {log_utils.format_user(message.author)}"
-    #         )
-    #         self.last_deleted = message.id
-    #         await message.author.ban(
-    #             delete_message_seconds=3600,
-    #             reason="Malicious Scam Attempt posted",
-    #         )
-
     @commands.Cog.listener(name="on_message")
     async def general_scam_detection(self, message: discord.Message):
         log_channel = general_logging(message, self.log_channel_name)
@@ -440,7 +402,9 @@ class Events(commands.Cog, name="Events"):
                 )
             self.last_deleted = message.id
 
-            self.logger.info(f"Log embed task result: {log_task.result()}. Ban task result: {ban_task.result()}")
+            self.logger.info(
+                f"Log embed task result: {log_task.result()}. Ban task result: {ban_task.result()}"
+            )
 
     @commands.Cog.listener(name="on_message")
     async def honeypot_detection(self, message: discord.Message):
@@ -472,6 +436,42 @@ class Events(commands.Cog, name="Events"):
                 delete_message_seconds=3600,
                 reason="Honeypot Message posted",
             )
+
+            # Commence meme part of this event.
+            num = await self.redis_client.get(honey_key.value)
+            if num is None:
+                num = 7  # Writing this code a ways into the honeypot bans, so set this up as a default.
+                sufx = "th"
+            else:
+                num = int(num) + 1
+                if num % 10 == 1 and num % 100 != 11:
+                    sufx = "st"
+                elif num % 10 == 2 and num % 100 != 12:
+                    sufx = "nd"
+                elif num % 10 == 3 and num % 100 != 13:
+                    sufx = "rd"
+                else:
+                    sufx = "th"
+
+            rand_strings = [
+                f"This is the {num}{sufx} time my Trap Card has been activated.",
+                f"This channel has identified {num} Very Cool Messages.",
+                f"Ah, a {num}{sufx} slab of meat. :)",
+                f"Hah! Gottem! That makes {num}!",
+            ]
+            embed = discord.Embed(
+                color=discord.Color.red(),
+                title="Very Cool Message Identified",
+                description=message.author.mention,
+                timestamp=message.created_at,
+            )
+            embed.set_author(
+                name=message.author.display_name,
+                icon_url=message.author.display_avatar.url,
+            )
+            embed.add_field(name="Flame", value=random.choice(rand_strings))
+            await message.channel.send(embed=embed)
+            await self.redis_client.set(honey_key.value, num)
 
     @commands.Cog.listener(name="on_message_delete")
     async def message_deleted(self, message: discord.Message):
