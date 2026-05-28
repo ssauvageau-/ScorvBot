@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+from datetime import datetime
 
 from PIL import Image, ImageSequence
 import discord
@@ -121,6 +122,29 @@ class MiscCommandCog(commands.Cog, name="Misc"):
             icon_url=message.author.avatar,
         )
         await interaction.response.send_message(embed=tmp_embed)
+
+    @app_commands.command(
+        name="countdown", description="Display a countdown until the release of FoA"
+    )
+    async def foa_countdown(self, interaction: discord.Interaction):
+        foa_release_date = datetime(2026, 7, 23, 8)
+        remaining_time = foa_release_date - datetime.now()
+        seconds = remaining_time.total_seconds()
+        if seconds > 0:
+            hours, remainder = divmod(seconds, 3600)
+            days, remainder = divmod(hours, 24)
+            await interaction.response.send_message(
+                f"Fangs of Asterkarn is expected to release {int(days)} days, or {int(hours)} hours from now, on July 23rd, 2026."
+            )
+        elif seconds > 86400:
+            await interaction.response.send_message(
+                f"Fangs of Asterkarn has already released, you silly goose.",
+                ephemeral=True,
+            )
+        else:
+            await interaction.response.send_message(
+                "By the glory of Ravager, Fangs of Asterkarn launches sometime today!"
+            )
 
     @app_commands.command(name="mobile")
     async def mobile_image(self, interaction: discord.Interaction, user: discord.User):
