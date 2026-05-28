@@ -83,7 +83,8 @@ class RaffleCommandGroup(app_commands.Group, name="raffle"):
         days = divmod(diff_s, 86400)  # 86400 seconds in a day
         if days[0] < int(raffle_config["age"]):
             await interaction.response.send_message(
-                f"Sorry, {interaction.user.global_name}, but your Discord account is not old enough to enter this raffle!"
+                f"Sorry, {interaction.user.global_name}, but you have not been part of this server for a long enough time to join this raffle!",
+                ephemeral=True,
             )
             await self.redis_client.hincrby(RAFFLE_CONFIG_KEY, "youth", 1)
             return
