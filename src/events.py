@@ -458,6 +458,7 @@ class Events(commands.Cog, name="Events"):
                 f"This channel has identified {num} Very Cool Messages.",
                 f"Ah, a {num}{sufx} slab of meat. :)",
                 f"Hah! Gottem! That makes {num}!",
+                f"{num} souls have been sacrificed to Glorious Ravager's maw, yet still He hungers.",
             ]
             embed = discord.Embed(
                 color=discord.Color.red(),
