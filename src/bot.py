@@ -78,7 +78,7 @@ bot_activity = discord.Activity(
 intents = discord.Intents.default()
 intents.value = 8
 intents.members = False  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
-intents.presences = False  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
+intents.presences = True  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
 intents.message_content = True  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
 bot = ScorvBot(intents=intents, activity=bot_activity)
 
