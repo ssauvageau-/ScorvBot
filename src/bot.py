@@ -75,7 +75,12 @@ logging_handler = setup_logging()
 bot_activity = discord.Activity(
     type=discord.ActivityType.custom, name="Watching for fresh meat!"
 )
-bot = ScorvBot(intents=discord.Intents.all(), activity=bot_activity)
+intents = discord.Intents.default()
+intents.value = 8
+intents.members = False  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
+intents.presences = False  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
+intents.message_content = True  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
+bot = ScorvBot(intents=intents, activity=bot_activity)
 
 # Run bot. Suppress default logging config since we used our own
 bot.run(TOKEN, log_handler=None)
