@@ -76,9 +76,8 @@ bot_activity = discord.Activity(
     type=discord.ActivityType.custom, name="Watching for fresh meat!"
 )
 intents = discord.Intents.default()
-intents.value = 8
-intents.members = False  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
-intents.presences = True  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
+# intents.presences = True  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
+# intents.members = True  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
 intents.message_content = True  # REQUIRES DEVELOPER PORTAL TOGGLE TO CHANGE
 bot = ScorvBot(intents=intents, activity=bot_activity)
 
