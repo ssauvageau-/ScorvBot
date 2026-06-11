@@ -88,13 +88,20 @@ class TaskCog(commands.Cog, name="Tasks"):
             if "complete" in str(thread["thread"].name.lower()):
                 await thread["thread"].delete()
             else:  # not a 'complete' thread - notify user of deletion and invite them to repost if needed
-                await thread["owner"].send(
-                    f"Hello, {thread['owner'].global_name}, your thread \"{thread['thread'].name}\" in "
-                    f"<#{thread['category'].id}> recently expired by exceeding the Grim Dawn server's thread lifespan of"
-                    f" {self.thread_expire_days} days. Feel free to repost this thread if you still need its posting. "
-                    f'If you no longer needed this thread, please rename future threads to include "complete" in their'
-                    f" titles, as those will be more swiftly (and silently) cleaned by ScorvBot. Thank you!"
-                )
+                try:
+                    await thread["owner"].send(
+                        f"Hello, {thread['owner'].global_name}, your thread \"{thread['thread'].name}\" in "
+                        f"<#{thread['category'].id}> recently expired by exceeding the Grim Dawn server's thread lifespan of"
+                        f" {self.thread_expire_days} days. Feel free to repost this thread if you still need its posting. "
+                        f'If you no longer needed this thread, please rename future threads to include "complete" in their'
+                        f" titles, as those will be more swiftly (and silently) cleaned by ScorvBot. Thank you!"
+                    )
+                except discord.errors.Forbidden:
+                    thr = thread["thread"]
+                    own = thread["owner"]
+                    logging.error(
+                        f"Could not contact user {own} about the closure of thread {thr}; user likely does not accept DMs from Applications."
+                    )
                 await thread["thread"].delete()
         return
 
