@@ -146,6 +146,27 @@ class MiscCommandCog(commands.Cog, name="Misc"):
                 "By the glory of Ravager, Fangs of Asterkarn launches sometime today!"
             )
 
+    @app_commands.command(name="privacy-policy")
+    async def privacy(self, interaction: discord.Interaction):
+        msg = (
+            "@ScorvBot#7016 does **not** collect your information on this server with any permanence beyond Discord itself."
+            "\n**None** of your information is used by ScorvBot for the purposes of training AI or LLMs."
+            "\n"
+            "\nScorvBot **does** perform the following:"
+            "\n* Store hashed versions of your messages' contents for a set number of seconds before those hashes expire."
+            "\n* Catalog your deleted messages, sending their contents to moderator-only channels."
+            "\n* Track when users connect and disconnect from voice calls. (Voice communication itself is not processed by ScorvBot)"
+            "\n* Catalog when users include masked URLs in their messages, revealing those masks (and the links beneath them) to moderators."
+            "\n* Logs when users utilize any of its slash-commands or trigger any of its events, such as Thinkematics."
+            "\n"
+            "\nScorvBot may try to DM you for certain features, such as automated thread deletion or Tag approval/rejection. We encourage users to allow Applications like ScorvBot to message them privately, but we cannot enforce this, and you are free to ignore messages from Discord Applications at your discretion."
+            "\nBy remaining on this server, you consent to the above operations."
+            "\n"
+            "\nAs development of ScorvBot continues, this privacy policy may update to reflect additional features."
+        )
+
+        await interaction.response.send_message(msg, ephemeral=True)
+
     @app_commands.command(name="mobile")
     async def mobile_image(self, interaction: discord.Interaction, user: discord.User):
         avatar = user.display_avatar
