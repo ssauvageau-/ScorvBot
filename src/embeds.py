@@ -160,8 +160,6 @@ buy_gd_embed.add_field(
     "\nhttps://www.grimdawn.com/"
     "\n**Steam**"
     "\nhttps://store.steampowered.com/app/219990/Grim_Dawn/"
-    "\n**Humble Bundle**"
-    "\nhttps://www.humblebundle.com/store/grim-dawn"
     "\n**GOG**"
     "\nhttps://www.gog.com/en/game/grim_dawn",
     inline=True,
@@ -210,11 +208,9 @@ buy_foa_embed = discord.Embed(color=0x60FFFC)
 buy_foa_embed.add_field(
     name="",
     value="**Steam**"
-    "\nArriving Posthaste!"
-    "\n**Humble Bundle**"
-    "\nArriving Posthaste!"
+    "\nhttps://store.steampowered.com/app/2699230/Grim_Dawn__Fangs_of_Asterkarn/"
     "\n**GOG**"
-    "\nArriving Posthaste!",
+    "\nhttps://www.gog.com/en/game/grim_dawn_fangs_of_asterkarn",
     inline=True,
 )
 buy_foa_embed.set_image(
