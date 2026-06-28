@@ -22,7 +22,7 @@ honey_key = rk.RedisKeys.DELAY
 def general_logging(message: discord.Message, lc: str):
     log_channel = discord.utils.find(
         lambda channel: channel.name == lc,
-        message.guild.channels,
+        message.channel.guild.channels,
     )
     if log_channel is None:
         raise Exception("Log channel not found")
