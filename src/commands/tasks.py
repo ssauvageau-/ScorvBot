@@ -34,23 +34,6 @@ class TaskCog(commands.Cog, name="Tasks"):
         self.batch_update.cancel()
         self.remove_sundered_role.cancel()
 
-    @tasks.loop(seconds=1, count=1)
-    async def test(self):
-        """
-        This will run and get any "old" (by discord's definition) threads, but nothing else.
-        """
-        # channels = await guild.fetch_channels()
-        # forums = []
-        # for channel in channels:
-        #     if type(channel) is discord.channel.ForumChannel:
-        #         if channel.name == "trade" or channel.name == "searching-players":
-        #             forums.append(channel)
-        # for channel in forums:
-        #     async for thread in channel.archived_threads():
-        #         print(thread)  # works
-        #     for thread in channel.threads:
-        #         print(thread)  # doesn't work, channel properties not cached by runtime?
-
     @tasks.loop(time=times)
     async def batch_update(self):
         await self.bot.wait_until_ready()
