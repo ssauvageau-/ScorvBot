@@ -21,9 +21,6 @@ class TaskCog(commands.Cog, name="Tasks"):
         self.guild_test = os.getenv("TEST_GUILD")
         self.env = os.getenv("ENV")
         self.batch_update.start()
-        self.runTest = ""
-        if self.runTest:
-            self.test.start()
         self.thread_expire_days = 21
         self.log_channel_name = "scorv-log"
         self.remove_sundered_role.start()
