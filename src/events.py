@@ -160,16 +160,16 @@ class Events(commands.Cog, name="Events"):
             )
             self.logger.info(f"crab event triggered on message {message.jump_url}")
 
-    @commands.Cog.listener(name="on_message")
-    async def xpac_event(self, message: discord.Message):
-        if message.author == self.bot.user:
-            return
-
-        if "xpacwhen" in message.content.replace(" ", "").lower():
-            await message.reply(
-                content="https://cdn.discordapp.com/attachments/1151691325549322262/1153779612053159946/image.png"
-            )
-            self.logger.info(f"xpac event triggered on message {message.jump_url}")
+    # @commands.Cog.listener(name="on_message")
+    # async def xpac_event(self, message: discord.Message):
+    #     if message.author == self.bot.user:
+    #         return
+    #
+    #     if "xpacwhen" in message.content.replace(" ", "").lower():
+    #         await message.reply(
+    #             content="https://cdn.discordapp.com/attachments/1151691325549322262/1153779612053159946/image.png"
+    #         )
+    #         self.logger.info(f"xpac event triggered on message {message.jump_url}")
 
     @commands.Cog.listener(name="on_message")
     async def thinkematic_event(self, message: discord.Message):
@@ -226,33 +226,33 @@ class Events(commands.Cog, name="Events"):
                 f"Thinkematics {think} triggered by {message.author.display_name} {think_message.jump_url}"
             )
 
-    @commands.Cog.listener(name="on_message")
-    async def sunder_event(self, message: discord.Message):
-        if message.author.bot:
-            return
-
-        sundered = discord.utils.find(
-            lambda role: role.name == "Sundered", message.author.roles
-        )
-        if sundered is not None:
-            return
-
-        threshold = 0.98 if "sunder" in message.content else 1
-        # too lazy to remove this if statement; random.random() cannot roll 1.0 so this disables any message being able to sunder
-
-        if random.random() >= threshold:
-            sundered_role = discord.utils.find(
-                lambda role: role.name == "Sundered", message.guild.roles
-            )
-
-            async with Sunder(message.author) as sunder:
-                sunder_message = await message.channel.send(
-                    file=sunder[0], embed=sunder[1]
-                )
-                await message.author.add_roles(sundered_role, reason="Sundered")
-                self.logger.info(
-                    f"Sundered {message.author.display_name} {sunder_message.jump_url}"
-                )
+    # @commands.Cog.listener(name="on_message")
+    # async def sunder_event(self, message: discord.Message):
+    #     if message.author.bot:
+    #         return
+    #
+    #     sundered = discord.utils.find(
+    #         lambda role: role.name == "Sundered", message.author.roles
+    #     )
+    #     if sundered is not None:
+    #         return
+    #
+    #     threshold = 0.98 if "sunder" in message.content else 1
+    #     # too lazy to remove this if statement; random.random() cannot roll 1.0 so this disables any message being able to sunder
+    #
+    #     if random.random() >= threshold:
+    #         sundered_role = discord.utils.find(
+    #             lambda role: role.name == "Sundered", message.guild.roles
+    #         )
+    #
+    #         async with Sunder(message.author) as sunder:
+    #             sunder_message = await message.channel.send(
+    #                 file=sunder[0], embed=sunder[1]
+    #             )
+    #             await message.author.add_roles(sundered_role, reason="Sundered")
+    #             self.logger.info(
+    #                 f"Sundered {message.author.display_name} {sunder_message.jump_url}"
+    #             )
 
     @commands.Cog.listener(name="on_message")
     async def masked_url_event(self, message: discord.Message):
