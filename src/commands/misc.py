@@ -37,31 +37,6 @@ class MiscCommandCog(commands.Cog, name="Misc"):
         response = await interaction.original_response()
         await response.add_reaction("🇫")
 
-    # @app_commands.command(
-    #     name="foa-meme",
-    #     description="Increment a counter and post a message letting users know the FoA expansion has been delayed!",
-    # )
-    # @app_commands.checks.has_any_role("Admin", "Moderator", "Crate Entertainment")
-    # async def expansion_meme(
-    #     self, interaction: discord.Interaction, user: discord.User
-    # ):
-    #     num = await self.redis_client.get(delay_key.value)
-    #     if num is None:
-    #         num = 0
-    #     else:
-    #         num = int(num)
-    #     await interaction.response.send_message(
-    #         "Sending the FoA meme message below:", ephemeral=True
-    #     )
-    #     day_term = "Day" if num == 0 else "Days"
-    #     await interaction.channel.send(
-    #         f"Thank you, {user.mention}, for inquiring about the release date of Grim Dawn's upcoming expansion, Fangs of Asterkarn!"
-    #         f"\nUnfortunately, every time this question is asked the expansion is delayed another day."
-    #         f"\n\n\tCurrent Delay: {num + 1} {day_term}"
-    #         f"\n\nWorry not, the expansion will be made available **posthaste**!"
-    #     )
-    #     await self.redis_client.incr(delay_key.value)
-
     @app_commands.command(
         name="scorv-post", description="Send a text message as Scorv! Limited access!"
     )
@@ -122,14 +97,6 @@ class MiscCommandCog(commands.Cog, name="Misc"):
             icon_url=message.author.avatar,
         )
         await interaction.response.send_message(embed=tmp_embed)
-
-    @app_commands.command(
-        name="countdown", description="Display a countdown until the release of FoA"
-    )
-    async def foa_countdown(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            f"Fangs of Asterkarn is expected to release <t:1784815200:R>, on <t:1784815200:F>!"
-        )
 
     @app_commands.command(name="privacy-policy")
     async def privacy(self, interaction: discord.Interaction):
